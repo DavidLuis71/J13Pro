@@ -1,0 +1,357 @@
+@import './colors.css'; /* Tus variables de color */
+
+/* ===== Reset y base ===== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  overflow-x: hidden;
+  font-family: 'Roboto', sans-serif;
+  /* background-color: var(--gray-light); */
+  color: var(--black);
+  line-height: 1.6;
+  
+}
+
+
+
+
+/* Títulos con estilo "deportivo" */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Permanent Marker', cursive;
+  color: var(--orange);
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+}
+
+/* ===== Hero / Video ===== */
+.hero img,
+.video video {
+  width: 100%;
+  height: 400px;
+  object-fit: cover;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+  transition: transform 0.3s;
+}
+
+.hero img:hover,
+.video video:hover {
+  transform: scale(1.02);
+}
+
+/* ===== Cards / Servicios ===== */
+.services {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  padding: 40px 20px;
+  flex-wrap: wrap;
+}
+
+.card {
+  background: var(--black);
+  color: var(--white);
+  padding: 30px;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 250px;
+  text-align: center;
+  transition: all 0.3s;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+}
+
+.card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+}
+
+/* ===== CTA ===== */
+.cta {
+  text-align: center;
+  padding: 60px 20px;
+  background: var(--white);
+  border-radius: 12px;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+}
+
+.cta button {
+  background: var(--orange);
+  color: var(--white);
+  padding: 12px 24px;
+  border: none;
+  border-radius: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+.cta button:hover {
+  background: var(--gold);
+  transform: scale(1.05);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+}
+
+/* ===== Footer ===== */
+.footer {
+  background: var(--black);
+  color: var(--white);
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.footer a {
+  color: var(--gold);
+  text-decoration: none;
+  font-weight: bold;
+  transition: color 0.3s;
+}
+
+.footer a:hover {
+  color: var(--orange);
+}
+
+/* ===== Hero Carousel ===== */
+.hero-carousel {
+  position: relative;
+  width: 100%;
+  height: 400px;
+  overflow: hidden;
+  border-radius: 0 0 20px 20px;
+  background-color: var(--black);
+}
+
+.hero-carousel img,
+.hero-carousel video {
+  width: 100%;
+  height: 400px;
+  object-fit: contain;
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+  z-index: 0;
+}
+
+.hero-carousel .active {
+  opacity: 1;
+  z-index: 1;
+}
+
+.hero-carousel .prev,
+.hero-carousel .next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--black);
+  color: var(--gold);
+  border: none;
+  font-size: 2rem;
+  padding: 10px;
+  cursor: pointer;
+  border-radius: 50%;
+  opacity: 0.7;
+  z-index: 10;
+  transition: opacity 0.3s;
+}
+
+.hero-carousel .prev:hover,
+.hero-carousel .next:hover {
+  opacity: 1;
+}
+
+.hero-carousel .prev { left: 10px; }
+.hero-carousel .next { right: 10px; }
+
+.hero-carousel .dots {
+  position: absolute;
+  bottom: 15px;
+  width: 100%;
+  text-align: center;
+  z-index: 10;
+}
+
+.hero-carousel .dot {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin: 0 5px;
+  background: var(--white);
+  border-radius: 50%;
+  cursor: pointer;
+  opacity: 0.5;
+  transition: background 0.3s, opacity 0.3s;
+}
+
+.hero-carousel .dot.active-dot {
+  background: var(--gold);
+  opacity: 1;
+}
+
+/* ===== Responsivo ===== */
+@media (max-width: 768px) {
+  .hero img,
+  .hero-carousel,
+  .hero-carousel img,
+  .hero-carousel video {
+    height: 250px;
+  }
+
+  .services {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .hero-carousel .prev,
+  .hero-carousel .next {
+    font-size: 1.5rem;
+    padding: 8px;
+  }
+
+  .hero-carousel .dot {
+    width: 10px;
+    height: 10px;
+  }
+}
+
+.AppBar {
+  background: var(--black) !important;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  transition: background 0.3s;
+}
+
+.AppBar:hover {
+  background: #111;
+}
+
+.MuiToolbar-root {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.MuiTypography-h6 {
+  font-family: 'Permanent Marker', cursive;
+  color: var(--orange);
+  font-size: 1.8rem;
+  letter-spacing: 1px;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+}
+
+.MuiButton-root {
+  color: var(--white) !important;
+  font-weight: bold;
+  transition: all 0.3s;
+}
+
+.MuiButton-root:hover {
+  color: var(--gold) !important;
+  transform: scale(1.05);
+}
+
+.MuiDrawer-paper {
+  background: var(--black);
+  color: var(--white);
+}
+
+.MuiListItemButton-root {
+  transition: all 0.3s;
+}
+
+.MuiListItemButton-root:hover {
+  background-color: rgba(255, 215, 0, 0.2);
+}
+
+.MuiListItemText-root {
+  font-weight: bold;
+  color: var(--black);
+}
+
+.MuiCollapse-wrapperInner .MuiListItemButton-root {
+  padding-left: 32px !important;
+}
+
+.MuiMenu-paper {
+  background: var(--black);
+  color: var(--white);
+  border-radius: 12px;
+}
+
+.MuiMenuItem-root {
+  transition: all 0.3s;
+}
+
+.MuiMenuItem-root:hover {
+  background: var(--gold);
+  color: var(--black);
+}
+
+/* Iconos de menú móvil */
+.MuiSvgIcon-root {
+  color: var(--gold);
+  transition: color 0.3s;
+}
+
+.MuiSvgIcon-root:hover {
+  color: var(--orange);
+}
+
+/* 🔹 Media queries para mobile */
+@media (max-width: 768px) {
+  .MuiDrawer-paper {
+    width: 80vw !important;
+  }
+
+  .MuiTypography-h6 {
+    font-size: 1.5rem;
+  }
+
+  .MuiButton-root {
+    font-size: 0.9rem;
+  }
+}
+
+/* Dialog oscuro general */
+.MuiDialog-paper {
+  background-color: var(--black-text-bg) !important;
+  color: var(--white);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+}
+
+/* Título dentro del Dialog */
+.MuiDialogTitle-root {
+  font-family: 'Permanent Marker', cursive;
+  font-size: 1.5rem;
+  color: var(--orange);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Botón de cerrar */
+.MuiIconButton-root {
+  color: var(--gold); /* dorado normal */
+  background-color: rgba(255, 255, 255, 0.05); /* pequeño fondo para resaltar el icono */
+  border-radius: 50%;
+  transition: all 0.3s;
+}
+
+.MuiIconButton-root:hover {
+  color: var(--orange);
+  background-color: rgba(255, 215, 0, 0.15);
+  transform: scale(1.1);
+}
+.MuiDialogContent-root {
+  color: var(--white);
+  font-size: 1rem;
+}
+

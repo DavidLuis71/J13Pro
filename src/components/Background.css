@@ -1,0 +1,13 @@
+.background-image {
+  position: fixed;   /* siempre detrás */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('src/assets/pistanueva.jpg'); /* ruta a tu foto */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.3;       /* controla la transparencia */
+  z-index: -1;        /* detrás de todo el contenido */
+}

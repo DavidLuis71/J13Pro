@@ -1,7 +1,6 @@
 import {
   AppBar,
   Toolbar,
-  Typography,
   Button,
   IconButton,
   Drawer,
@@ -18,6 +17,10 @@ import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import logo from '../assets/logo.png';
+import sinfondo from '../assets/sinfondo.png';
+
+
 
 export default function Header() {
   const [open, setOpen] = useState(false);
@@ -29,9 +32,22 @@ export default function Header() {
     <>
       <AppBar position="sticky" sx={{ background: "#000", width:"100%" }}>
         <Toolbar>
-          <Typography variant="h6" sx={{ flexGrow: 1 }}>
-            J13PRO
-          </Typography>
+         <Box sx={{ flexGrow: 1, display: "flex", alignItems: "center", gap: 1 }}>
+    <img
+      src={logo}
+      alt="J13Pro Logo"
+      style={{ width: 50, height: 50, borderRadius: "50%" }}
+    />
+
+    <img
+ src={sinfondo}
+  alt="J13Pro Texto"
+  style={{
+    height: 40,
+    filter: "drop-shadow(2px 2px 2px rgba(255, 215, 0, 0.8))",
+  }}
+/>
+  </Box>
 
           {/* DESKTOP */}
           <Box sx={{ display: { xs: "none", md: "flex" }, gap: 2 }}>

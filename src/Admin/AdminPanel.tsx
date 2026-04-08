@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Box,  Typography,  Tabs, Tab, Paper } from "@mui/material";
 import AdminCarouselUpload from "./AdminCarouselUpload"; 
 import Header from "../components/Header";
+import AdminBabyPro from "./AdminBabyPro";
 
 const AdminPanel: React.FC = () => {
   const [activeTab, setActiveTab] = useState(0);
@@ -11,7 +12,14 @@ const AdminPanel: React.FC = () => {
   };
 
   return (
-    <Box>
+    <Box
+  sx={{
+    minHeight: "100vh",
+    backgroundColor: "#ffffff", // fondo sólido oscuro
+    color: "white",
+    padding: 4,
+  }}
+>
     <Header />
     <Box sx={{ display: "flex", flexDirection: "column", padding: 4, gap: 4 }}>
         
@@ -41,7 +49,7 @@ const AdminPanel: React.FC = () => {
         {activeTab === 0 && <AdminCarouselUpload />}
         {activeTab === 1 && <Typography>Aquí podrás modificar Contactanos</Typography>}
         {activeTab === 2 && <Typography>Aquí podrás modificar Alquiler</Typography>}
-        {activeTab === 3 && <Typography>Aquí podrás modificar baby pro</Typography>}
+        {activeTab === 3 && <AdminBabyPro />}
          {activeTab === 4 && <Typography>Aquí podrás modificar los campus</Typography>}
         {activeTab === 5 && <Typography>Aquí podrás modificar j13 ProOne</Typography>}
         {activeTab === 6 && <Typography>Aquí podrás modificar pachangas</Typography>}

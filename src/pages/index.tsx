@@ -1,8 +1,8 @@
 import { Box, Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography } from "@mui/material";
 import { useState } from "react";
 import Header from "../components/Header";
-import "./index.css";
 import Carousel from "./Carousel";
+import Footer from "../components/Footer";
 
 export default function Index() {
   const [openModal, setOpenModal] = useState(true); // Modal abierto al cargar
@@ -62,17 +62,29 @@ export default function Index() {
       </section>
 
       {/* CTA */}
-      <section className="cta">
-        <h2>¿Estás list@?</h2>
-        <h3>¡Vamos a por todas!</h3>
-        <p>Déjanos tus datos y te llamaremos</p>
-        <button>CONTACTA</button>
-      </section>
+      <Box
+        sx={{
+          textAlign: "center",
+          py: 6,
+          backgroundColor: "#111",
+          color: "white",
+        }}
+      >
+        <Typography variant="h5">¿Estás list@?</Typography>
+        <Typography variant="h6" sx={{ mb: 2 }}>
+          ¡Vamos a por todas!
+        </Typography>
+        <Typography sx={{ mb: 3 }}>
+          Déjanos tus datos y te llamaremos a la mayor brevedad posible
+        </Typography>
+
+        <Button variant="contained" color="primary">
+          CONTACTA
+        </Button>
+      </Box>
 
       {/* FOOTER */}
-      <footer className="footer">
-        <p>© 2024 J13 PRO</p>
-      </footer>
+     <Footer/>
     </Box>
   );
 }
