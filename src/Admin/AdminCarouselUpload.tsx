@@ -113,9 +113,15 @@ const AdminCarouselUpload: React.FC = () => {
           onChange={e => setFile(e.target.files?.[0] || null)}
           disabled={uploading}
         />
-        <Button onClick={handleUpload} disabled={!file || uploading} sx={{ ml: 2 }}>
-          {uploading ? "Subiendo..." : "Subir Imagen"}
-        </Button>
+<Button
+  variant="contained"
+  color="primary"
+  onClick={handleUpload}
+  disabled={!file || uploading}
+  sx={{ ml: 2 }}
+>
+  {uploading ? "Subiendo..." : "Subir Imagen"}
+</Button>
       </Box>
 
       {message && (

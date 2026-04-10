@@ -1,159 +1,214 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../api/supabaseClient";
-import { Box, Typography, TextField, Button, Input } from "@mui/material";
+import {
+  Box,
+  Typography,
+  TextField,
+  Button,
+  Input,
+  Grid,
+  Paper,
+  IconButton,
+} from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
+
+interface MediaItem {
+  id: string;
+  url: string;
+  alt: string;
+  type: "image" | "video";
+  order_index: number;
+  page_slug: string;
+}
+
+const PAGE_SLUG = "baby-pro";
 
 const AdminBabyPro: React.FC = () => {
   const [content, setContent] = useState("");
-  const [video, setVideo] = useState<File | null>(null);
-  const [videoURL, setVideoURL] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const [alt, setAlt] = useState("");
+  const [media, setMedia] = useState<MediaItem[]>([]);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // 🔹 Cargar datos
+  // ---------------------------
+  // LOAD DATA
+  // ---------------------------
   const fetchData = async () => {
-    const { data, error } = await supabase.from("baby_pro").select("*").single();
+    const { data: page } = await supabase
+      .from("pages")
+      .select("content")
+      .eq("slug", PAGE_SLUG)
+      .single();
 
-    if (error) {
-      console.error(error);
-      setMessage("Error cargando datos");
-    } else {
-      setContent(data.content || "");
-      setVideoURL(data.video_url || "");
-    }
+    if (page) setContent(page.content || "");
+
+    const { data: mediaData, error } = await supabase
+      .from("page_media")
+      .select("*")
+      .eq("page_slug", PAGE_SLUG)
+      .order("order_index", { ascending: true });
+
+    if (!error) setMedia(mediaData || []);
   };
 
   useEffect(() => {
     fetchData();
   }, []);
 
-  // 🔹 Subir video
-  const handleUploadVideo = async () => {
-    if (!video) return;
+  // ---------------------------
+  // SAVE CONTENT
+  // ---------------------------
+  const handleSaveContent = async () => {
+    setLoading(true);
+
+    const { data: existing } = await supabase
+      .from("pages")
+      .select("id")
+      .eq("slug", PAGE_SLUG)
+      .single();
+
+    if (existing) {
+      await supabase
+        .from("pages")
+        .update({
+          content,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", existing.id);
+    } else {
+      await supabase.from("pages").insert({
+        slug: PAGE_SLUG,
+        content,
+        updated_at: new Date().toISOString(),
+      });
+    }
+
+    setMessage("Contenido guardado ✅");
+    setLoading(false);
+  };
+
+  // ---------------------------
+  // UPLOAD MEDIA
+  // ---------------------------
+  const handleUploadMedia = async () => {
+    if (!file) return;
 
     setLoading(true);
 
-    const fileName = `${Date.now()}_${video.name}`;
+    const fileName = `${Date.now()}_${file.name}`;
+    const bucket = "baby-pro";
 
     const { data, error } = await supabase.storage
-      .from("baby-pro")
-      .upload(fileName, video);
+      .from(bucket)
+      .upload(fileName, file);
 
     if (error) {
-      console.error(error);
-      setMessage("Error subiendo el video");
+      setMessage("Error subiendo archivo");
       setLoading(false);
       return;
     }
 
     const { data: urlData } = supabase.storage
-      .from("baby-pro")
+      .from(bucket)
       .getPublicUrl(data.path);
 
-    setVideoURL(urlData.publicUrl);
+    const type = file.type.startsWith("video") ? "video" : "image";
+
+    await supabase.from("page_media").insert({
+      page_slug: PAGE_SLUG,
+      url: urlData.publicUrl,
+      alt: alt || file.name,
+      type,
+      order_index: media.length,
+    });
+
+    setFile(null);
+    setAlt("");
+    fetchData();
+    setMessage("Media subida ✅");
     setLoading(false);
   };
 
-  // 🔹 Guardar contenido
-const handleSave = async () => {
-  setLoading(true);
+  // ---------------------------
+  // DELETE MEDIA
+  // ---------------------------
+  const handleDelete = async (item: MediaItem) => {
+    const path = item.url.split("/").pop();
 
-  // 1️⃣ Verificar si existe
-  const { data: existing, error: fetchError } = await supabase
-    .from("baby_pro")
-    .select("*")
-    .single();
+    await supabase.storage.from("baby-pro").remove([path!]);
 
-  if (fetchError && fetchError.code !== "PGRST116") { // PGRST116 = no hay fila
-    console.error(fetchError);
-    setMessage("Error verificando fila");
-    setLoading(false);
-    return;
-  }
+    await supabase.from("page_media").delete().eq("id", item.id);
 
-  if (existing) {
-    // ✅ Actualizar
-    const { error } = await supabase
-      .from("baby_pro")
-      .update({
-        content,
-        video_url: videoURL,
-        updated_at: new Date(),
-      })
-      .eq("id", existing.id);
-
-    if (error) console.error(error);
-    setMessage(error ? "Error guardando" : "Guardado correctamente ✅");
-  } else {
-    // 🆕 Insertar
-    const { error } = await supabase
-      .from("baby_pro")
-      .insert({
-        content,
-        video_url: videoURL,
-        updated_at: new Date(),
-      });
-
-    if (error) console.error(error);
-    setMessage(error ? "Error insertando" : "Guardado correctamente ✅");
-  }
-
-  setLoading(false);
-};
+    fetchData();
+    setMessage("Eliminado ✅");
+  };
 
   return (
     <Box sx={{ p: 4 }}>
-      <Typography variant="h4" gutterBottom>
-        Admin Baby Pro
-      </Typography>
+      <Typography variant="h4">Admin Baby Pro</Typography>
 
-      {/* VIDEO */}
-      <Typography variant="h6">Video</Typography>
-
-      <Input
-        type="file"
-        onChange={(e) => setVideo(e.target.files?.[0] || null)}
-      />
-
-      <Button onClick={handleUploadVideo} disabled={loading}>
-        Subir Video
-      </Button>
-
-      {videoURL && (
-        <video
-          src={videoURL}
-          controls
-          style={{ width: "100%", maxHeight: 200, marginTop: 10 }}
-        />
-      )}
-
-      {/* CONTENIDO */}
-      <Typography variant="h6" sx={{ mt: 4 }}>
-        Contenido (HTML)
+      {/* CONTENT */}
+      <Typography variant="h6" sx={{ mt: 3 }}>
+        Contenido
       </Typography>
 
       <TextField
         multiline
-        minRows={10}
+        minRows={6}
         fullWidth
         value={content}
         onChange={(e) => setContent(e.target.value)}
       />
 
-      {/* BOTÓN GUARDAR */}
       <Button
         variant="contained"
-        sx={{ mt: 3 }}
-        onClick={handleSave}
+        sx={{ mt: 2 }}
+        onClick={handleSaveContent}
         disabled={loading}
       >
-        Guardar cambios
+        Guardar contenido
       </Button>
 
-      {message && (
-        <Typography sx={{ mt: 2 }}>
-          {message}
-        </Typography>
-      )}
+      {/* UPLOAD */}
+      <Typography variant="h6" sx={{ mt: 5 }}>
+        Media
+      </Typography>
+
+      <Input type="file" onChange={(e) => setFile(e.target.files?.[0] || null)} />
+
+      <Button
+        variant="contained"
+        sx={{ mt: 2 }}
+        onClick={handleUploadMedia}
+        disabled={!file || loading}
+      >
+        Subir
+      </Button>
+
+      {/* MEDIA LIST */}
+      <Grid container spacing={2} >
+        {media.map((item) => (
+          <Grid key={item.id} size={{ xs: 6, sm: 4, md: 3 }}>
+            <Paper sx={{ position: "relative", p: 1 }}>
+              {item.type === "video" ? (
+                <video src={item.url} controls style={{ width: "100%" }} />
+              ) : (
+                <img src={item.url} style={{ width: "100%" }} />
+              )}
+
+              <IconButton
+                onClick={() => handleDelete(item)}
+                sx={{ position: "absolute", top: 5, right: 5 }}
+              >
+                <DeleteIcon />
+              </IconButton>
+            </Paper>
+          </Grid>
+        ))}
+      </Grid>
+
+      {message && <Typography sx={{ mt: 2 }}>{message}</Typography>}
     </Box>
   );
 };

@@ -3,27 +3,43 @@ import { Box, Typography, Button } from "@mui/material";
 import { supabase } from "../api/supabaseClient";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import Carousel from "../components/Carousel";
 
 export default function BabyPro() {
   const [content, setContent] = useState("");
-  const [videoURL, setVideoURL] = useState("");
+  const [media, setMedia] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // 🔹 Cargar datos de Supabase
   useEffect(() => {
     const fetchData = async () => {
-      const { data, error } = await supabase
-        .from("baby_pro")
+      setLoading(true);
+
+      // 📄 CONTENIDO (pages)
+      const { data: page, error: pageError } = await supabase
+        .from("pages")
         .select("*")
+        .eq("slug", "baby-pro")
         .single();
 
-      if (error) {
-        console.error(error);
-        setError("Error cargando datos de Baby Pro");
+      if (pageError) {
+        console.error(pageError);
+        setError("Error cargando contenido");
       } else {
-        setContent(data?.content || "");
-        setVideoURL(data?.video_url || "");
+        setContent(page?.content || "");
+      }
+
+      // 🖼 MEDIA (imagenes / videos)
+      const { data: mediaData, error: mediaError } = await supabase
+        .from("page_media")
+        .select("*")
+        .eq("page_slug", "baby-pro")
+        .order("order_index");
+
+      if (mediaError) {
+        console.error(mediaError);
+      } else {
+        setMedia(mediaData || []);
       }
 
       setLoading(false);
@@ -32,82 +48,67 @@ export default function BabyPro() {
     fetchData();
   }, []);
 
-  // 🔹 Render
   return (
     <Box sx={{ width: "100vw", overflowX: "hidden" }}>
       <Header />
 
-      {/* VIDEO */}
-      {videoURL && (
-        <Box sx={{ width: "100%" }}>
-          <video
-            src={videoURL}
-            controls
-            autoPlay
-            muted
-            loop
-            style={{
-              width: "100%",
-              maxHeight: "400px",
-              objectFit: "cover",
-            }}
-          />
-        </Box>
-      )}
+      {/* 🎠 CARRUSEL (HOME NO, AQUÍ SOLO SI LO QUIERES LOCAL) */}
+      <Carousel pageSlug="baby-pro" />
 
-      {/* CONTENIDO */}
-      {/* CONTENIDO */}
-<Box
-  sx={{
-    maxWidth: 900,
-    mx: "auto",
-    p: 6,
-    backgroundColor: "rgba(0,0,0,0.9)",
-    color: "white",
-    borderRadius: 2,
-    boxShadow: "0 8px 25px rgba(0,0,0,0.4)",
-    lineHeight: 1.7,
-    mb: 6,
-  }}
->
-  {loading ? (
-    <Typography>Cargando...</Typography>
-  ) : error ? (
-    <Typography color="error">{error}</Typography>
-  ) : (
-    <>
-      {(() => {
-        const lines = content.split("\n"); // Separar por saltos de línea
-        const firstLine = lines.shift();   // Sacar la primera línea
-        const rest = lines.join("\n");     // El resto del contenido
+      {/* 📄 CONTENIDO */}
+      <Box
+        sx={{
+          maxWidth: 900,
+          mx: "auto",
+          p: 6,
+          backgroundColor: "rgba(0,0,0,0.9)",
+          color: "white",
+          borderRadius: 2,
+          boxShadow: "0 8px 25px rgba(0,0,0,0.4)",
+          lineHeight: 1.7,
+          mt: 4,
+          mb: 6,
+        }}
+      >
+        {loading ? (
+          <Typography>Cargando...</Typography>
+        ) : error ? (
+          <Typography color="error">{error}</Typography>
+        ) : (
+          (() => {
+            const lines = content.split("\n");
+            const firstLine = lines.shift();
+            const rest = lines.join("\n");
 
-        return (
-          <>
-            {firstLine && (
-              <Typography
-                sx={{
-                  fontSize: "2rem",
-                  fontWeight: "bold",
-                  mb: 2,
-                  lineHeight: 1.3,
-                  color: "var(--orange)",
-                }}
-              >
-                {firstLine}
-              </Typography>
-            )}
+            return (
+              <>
+                {firstLine && (
+                  <Typography
+                    sx={{
+                      fontSize: "2rem",
+                      fontWeight: "bold",
+                      mb: 2,
+                      lineHeight: 1.3,
+                      color: "var(--orange)",
+                    }}
+                  >
+                    {firstLine}
+                  </Typography>
+                )}
 
-            {rest && (
-              <Typography sx={{ whiteSpace: "pre-line", fontSize: "1.1rem" }}>
-                {rest}
-              </Typography>
-            )}
-          </>
-        );
-      })()}
-    </>
-  )}
-</Box>
+                {rest && (
+                  <Typography sx={{ whiteSpace: "pre-line", fontSize: "1.1rem" }}>
+                    {rest}
+                  </Typography>
+                )}
+              </>
+            );
+          })()
+        )}
+      </Box>
+
+    
+
       {/* CTA */}
       <Box
         sx={{
