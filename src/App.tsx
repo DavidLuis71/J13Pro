@@ -5,6 +5,7 @@ import Legal from "./pages/legal";
 import Baby from "./pages/BabyPro";
 import "./App.css";
 import Background from "./components/Background";
+import PageRenderer from "./pages/PageRenderer";
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
       <Route path="/admin" element={<AdminPanel />} /> 
       <Route path="/legal" element={<Legal />} /> 
       <Route path="/baby" element={<Baby />} /> 
+       <Route path="/:slug" element={<PageRenderer />} />
     </Routes>
     </Router>
   );

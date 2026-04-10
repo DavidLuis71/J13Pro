@@ -52,7 +52,6 @@ export default function BabyPro() {
     <Box sx={{ width: "100vw", overflowX: "hidden" }}>
       <Header />
 
-      {/* 🎠 CARRUSEL (HOME NO, AQUÍ SOLO SI LO QUIERES LOCAL) */}
       <Carousel pageSlug="baby-pro" />
 
       {/* 📄 CONTENIDO */}

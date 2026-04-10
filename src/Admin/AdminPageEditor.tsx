@@ -10,6 +10,7 @@ import {
   Paper,
   IconButton,
 } from "@mui/material";
+
 import DeleteIcon from "@mui/icons-material/Delete";
 
 interface MediaItem {
@@ -19,11 +20,15 @@ interface MediaItem {
   type: "image" | "video";
   order_index: number;
   page_slug: string;
+  file_path: string; // 👈 NUEVO
 }
 
-const PAGE_SLUG = "baby-pro";
+interface Props {
+  slug: string;
+  title?: string;
+}
 
-const AdminBabyPro: React.FC = () => {
+const AdminPageEditor: React.FC<Props> = ({ slug, title }) => {
   const [content, setContent] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [media, setMedia] = useState<MediaItem[]>([]);
@@ -37,7 +42,7 @@ const AdminBabyPro: React.FC = () => {
     const { data: page } = await supabase
       .from("pages")
       .select("content")
-      .eq("slug", PAGE_SLUG)
+      .eq("slug", slug)
       .single();
 
     if (page) setContent(page.content || "");
@@ -45,15 +50,15 @@ const AdminBabyPro: React.FC = () => {
     const { data: mediaData, error } = await supabase
       .from("page_media")
       .select("*")
-      .eq("page_slug", PAGE_SLUG)
+      .eq("page_slug", slug)
       .order("order_index", { ascending: true });
 
     if (!error) setMedia(mediaData || []);
   };
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (slug) fetchData();
+  }, [slug]);
 
   // ---------------------------
   // SAVE CONTENT
@@ -64,7 +69,7 @@ const AdminBabyPro: React.FC = () => {
     const { data: existing } = await supabase
       .from("pages")
       .select("id")
-      .eq("slug", PAGE_SLUG)
+      .eq("slug", slug)
       .single();
 
     if (existing) {
@@ -77,7 +82,7 @@ const AdminBabyPro: React.FC = () => {
         .eq("id", existing.id);
     } else {
       await supabase.from("pages").insert({
-        slug: PAGE_SLUG,
+        slug,
         content,
         updated_at: new Date().toISOString(),
       });
@@ -88,18 +93,18 @@ const AdminBabyPro: React.FC = () => {
   };
 
   // ---------------------------
-  // UPLOAD MULTIPLE MEDIA
+  // UPLOAD MEDIA (FIXED)
   // ---------------------------
   const handleUploadMedia = async () => {
     if (!files.length) return;
 
     setLoading(true);
 
-    const bucket = "baby-pro";
+    const bucket = "pages";
 
     try {
       const uploads = files.map(async (file) => {
-        const fileName = `${Date.now()}_${file.name}`;
+        const fileName = `${slug}/${Date.now()}_${file.name}`;
 
         const { data, error } = await supabase.storage
           .from(bucket)
@@ -114,11 +119,12 @@ const AdminBabyPro: React.FC = () => {
         const type = file.type.startsWith("video") ? "video" : "image";
 
         return {
-          page_slug: PAGE_SLUG,
+          page_slug: slug,
           url: urlData.publicUrl,
           alt: file.name,
           type,
           order_index: media.length,
+          file_path: data.path, // 👈 IMPORTANTE
         };
       });
 
@@ -142,21 +148,34 @@ const AdminBabyPro: React.FC = () => {
   };
 
   // ---------------------------
-  // DELETE MEDIA
+  // DELETE MEDIA (FIXED)
   // ---------------------------
   const handleDelete = async (item: MediaItem) => {
-    const path = item.url.split("/").pop();
+    try {
+      // 1. borrar de storage
+      await supabase.storage
+        .from("pages")
+        .remove([item.file_path]);
 
-    await supabase.storage.from("baby-pro").remove([path!]);
-    await supabase.from("page_media").delete().eq("id", item.id);
+      // 2. borrar de DB
+      await supabase
+        .from("page_media")
+        .delete()
+        .eq("id", item.id);
 
-    fetchData();
-    setMessage("Eliminado ✅");
+      fetchData();
+      setMessage("Eliminado ✅");
+    } catch (err) {
+      console.error(err);
+      setMessage("Error eliminando ❌");
+    }
   };
 
   return (
     <Box sx={{ p: 4 }}>
-      <Typography variant="h4">Admin Baby Pro</Typography>
+      <Typography variant="h4">
+        {title || slug}
+      </Typography>
 
       {/* CONTENT */}
       <Typography variant="h6" sx={{ mt: 3 }}>
@@ -180,7 +199,7 @@ const AdminBabyPro: React.FC = () => {
         Guardar contenido
       </Button>
 
-      {/* UPLOAD MULTIPLE */}
+      {/* UPLOAD */}
       <Typography variant="h6" sx={{ mt: 5 }}>
         Subir media
       </Typography>
@@ -191,44 +210,6 @@ const AdminBabyPro: React.FC = () => {
         onChange={(e) => setFiles(Array.from(e.target.files || []))}
       />
 
-      {files.length > 0 && (
-        <Box sx={{ mt: 2 }}>
-          <Typography variant="body2">
-            {files.length} archivo(s) seleccionados
-          </Typography>
-
-          <Grid container spacing={1} sx={{ mt: 1 }}>
-            {files.map((file, i) => (
-              <Grid key={i}>
-                <Paper sx={{ p: 1 }}>
-                  {file.type.startsWith("video") ? (
-                    <video
-                      src={URL.createObjectURL(file)}
-                      style={{
-                        width: 120,
-                        height: 80,
-                        objectFit: "cover",
-                        borderRadius: 6,
-                      }}
-                    />
-                  ) : (
-                    <img
-                      src={URL.createObjectURL(file)}
-                      style={{
-                        width: 120,
-                        height: 80,
-                        objectFit: "cover",
-                        borderRadius: 6,
-                      }}
-                    />
-                  )}
-                </Paper>
-              </Grid>
-            ))}
-          </Grid>
-        </Box>
-      )}
-
       <Button
         variant="contained"
         sx={{ mt: 2 }}
@@ -238,32 +219,15 @@ const AdminBabyPro: React.FC = () => {
         {loading ? "Subiendo..." : "Subir archivos"}
       </Button>
 
-      {/* MEDIA LIST */}
+      {/* MEDIA */}
       <Grid container spacing={2} sx={{ mt: 4 }}>
         {media.map((item) => (
           <Grid key={item.id} size={{ xs: 6, sm: 4, md: 3 }}>
             <Paper sx={{ position: "relative", p: 1 }}>
               {item.type === "video" ? (
-                <video
-                  src={item.url}
-                  controls
-                  style={{
-                    width: "100%",
-                    height: 120,
-                    objectFit: "cover",
-                    borderRadius: 6,
-                  }}
-                />
+                <video src={item.url} controls style={{ width: "100%" }} />
               ) : (
-                <img
-                  src={item.url}
-                  style={{
-                    width: "100%",
-                    height: 120,
-                    objectFit: "cover",
-                    borderRadius: 6,
-                  }}
-                />
+                <img src={item.url} style={{ width: "100%" }} />
               )}
 
               <IconButton
@@ -286,4 +250,4 @@ const AdminBabyPro: React.FC = () => {
   );
 };
 
-export default AdminBabyPro;
+export default AdminPageEditor;

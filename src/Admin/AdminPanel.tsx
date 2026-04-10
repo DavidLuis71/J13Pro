@@ -1,63 +1,230 @@
-import { useState } from "react";
-import { Box,  Typography,  Tabs, Tab, Paper } from "@mui/material";
-import AdminCarouselUpload from "./AdminCarouselUpload"; 
+import { useEffect, useState } from "react";
+import { supabase } from "../api/supabaseClient";
+import {
+  Box,
+  Tabs,
+  Tab,
+  Paper,
+  Typography,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Checkbox,
+  FormControlLabel,
+  MenuItem,
+} from "@mui/material";
+
 import Header from "../components/Header";
-import AdminBabyPro from "./AdminBabyPro";
+import AdminPageEditor from "./AdminPageEditor";
+import AdminCarouselUpload from "./AdminCarouselUpload";
+
+interface Page {
+  id: string;
+  slug: string;
+  title: string;
+  is_nav_group: boolean;
+  parent_slug: string | null;
+}
+const generateSlug = (text: string) =>
+  text
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/[^\w-]+/g, "");
 
 const AdminPanel: React.FC = () => {
-  const [activeTab, setActiveTab] = useState(0);
+  const [pages, setPages] = useState<Page[]>([]);
+  const [activeSlug, setActiveSlug] = useState<string>("carousel");
 
-  const handleChange = (_: React.SyntheticEvent, newValue: number) => {
-    setActiveTab(newValue);
+  // CREATE PAGE
+  const [openCreate, setOpenCreate] = useState(false);
+  const [newTitle, setNewTitle] = useState("");
+  const [newSlug, setNewSlug] = useState("");
+
+  const [isNavGroup, setIsNavGroup] = useState(false);
+  const [parent, setParent] = useState<string | null>(null);
+
+  // ---------------------------
+  // LOAD PAGES
+  // ---------------------------
+  const fetchPages = async () => {
+    const { data, error } = await supabase
+      .from("pages")
+      .select("id, slug, title, is_nav_group, parent_slug")
+      .order("title", { ascending: true });
+
+    if (error) {
+      console.error(error);
+      return;
+    }
+
+    setPages(data || []);
+  };
+
+  useEffect(() => {
+    fetchPages();
+  }, []);
+
+  // ---------------------------
+  // CREATE PAGE
+  // ---------------------------
+  const createPage = async () => {
+    if (!newSlug || !newTitle) return;
+
+    const { error } = await supabase.from("pages").insert({
+      title: newTitle,
+      slug: newSlug,
+      content: isNavGroup ? null : "",
+      is_nav_group: isNavGroup,
+      parent_slug: parent,
+    });
+
+    if (error) {
+      console.error(error);
+      return;
+    }
+
+    setOpenCreate(false);
+    setNewTitle("");
+    setNewSlug("");
+    setIsNavGroup(false);
+    setParent(null);
+
+    await fetchPages();
+    setActiveSlug(newSlug);
   };
 
   return (
-    <Box
+    <Box sx={{ minHeight: "100vh", bgcolor: "#fff", p: 4 }}>
+      <Header />
+
+      <Box sx={{ mt: 3, display: "flex", flexDirection: "column", gap: 3 }}>
+
+        {/* HEADER ACTIONS */}
+        <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+          <Typography variant="h5">Admin Panel</Typography>
+
+          <Button variant="contained" onClick={() => setOpenCreate(true)}>
+            + Nueva página
+          </Button>
+        </Box>
+
+        {/* TABS */}
+        <Paper sx={{ borderRadius: 2 }}>
+          <Tabs
+            value={activeSlug}
+            onChange={(_, value) => setActiveSlug(value)}
+            variant="scrollable"
+            scrollButtons="auto"
+          >
+            {/* FIJO */}
+            <Tab value="carousel" label="Carrusel Inicio" />
+
+            {/* SOLO PÁGINAS REALES (NO NAV GROUPS) */}
+            {pages
+              .filter((p) => !p.is_nav_group)
+              .map((page) => (
+                <Tab
+                  key={page.id}
+                  value={page.slug}
+                  label={page.title || page.slug}
+                />
+              ))}
+          </Tabs>
+        </Paper>
+
+        {/* CONTENT */}
+        <Box>
+          {activeSlug === "carousel" ? (
+            <AdminCarouselUpload />
+          ) : activeSlug ? (
+            <AdminPageEditor slug={activeSlug} />
+          ) : (
+            <Typography>Cargando...</Typography>
+          )}
+        </Box>
+      </Box>
+
+      {/* CREATE PAGE MODAL */}
+      <Dialog open={openCreate} onClose={() => setOpenCreate(false)}>
+        <DialogTitle>Crear nueva página</DialogTitle>
+
+        <DialogContent>
+          {/* TITULO */}
+          <TextField
+            fullWidth
+            label="Título"
+            value={newTitle}
+           onChange={(e) => {
+  const value = e.target.value;
+  setNewTitle(value);
+
+  // solo auto-actualiza slug si todavía no lo ha tocado
+  if (!newSlug || newSlug === generateSlug(newTitle)) {
+    setNewSlug(generateSlug(value));
+  }
+}}
+          sx={{
+  mt: 2,
+  backgroundColor: "#fff",
+  borderRadius: 1,
+}}
+          />
+
+
+          {/* NAV GROUP */}
+          <FormControlLabel
+            sx={{ mt: 2 }}
+            control={
+              <Checkbox
+                checked={isNavGroup}
+                onChange={(e) => {
+                  setIsNavGroup(e.target.checked);
+                  if (e.target.checked) setParent(null);
+                }}
+              />
+            }
+            label="Es grupo de navegación (no tiene contenido)"
+          />
+
+          {/* PARENT SELECT */}
+          {!isNavGroup && (
+           <TextField
+  select
+  fullWidth
+  label="Página padre (opcional)"
+  value={parent || ""}
+  onChange={(e) => setParent(e.target.value || null)}
   sx={{
-    minHeight: "100vh",
-    backgroundColor: "#ffffff", // fondo sólido oscuro
-    color: "white",
-    padding: 4,
+    mt: 2,
+    backgroundColor: "#fff",
+    borderRadius: 1,
   }}
 >
-    <Header />
-    <Box sx={{ display: "flex", flexDirection: "column", padding: 4, gap: 4 }}>
-        
-        <Paper sx={{ borderRadius: 2 }}>
-        <Tabs
-          value={activeTab}
-          onChange={handleChange}
-          indicatorColor="primary"
-          textColor="primary"
-          variant="scrollable"
-          scrollButtons="auto"
-        >
-          <Tab label="Carrusel Inicio" />
-          <Tab label="Contactanos" />
-          <Tab label="Alquiler" />
-          <Tab label="Baby Pro" />
-          <Tab label="Campus" />
-          <Tab label="J13ProOne" />
-          <Tab label="Pachangas" />
-          <Tab label="Cumpleaños" />
-          <Tab label="Patrocinadores" />
-          <Tab label="Como llegar" />
-        </Tabs>
-      </Paper>
+  <MenuItem value="">Ninguna (principal)</MenuItem>
 
-      <Box sx={{ marginTop: 3 }}>
-        {activeTab === 0 && <AdminCarouselUpload />}
-        {activeTab === 1 && <Typography>Aquí podrás modificar Contactanos</Typography>}
-        {activeTab === 2 && <Typography>Aquí podrás modificar Alquiler</Typography>}
-        {activeTab === 3 && <AdminBabyPro />}
-         {activeTab === 4 && <Typography>Aquí podrás modificar los campus</Typography>}
-        {activeTab === 5 && <Typography>Aquí podrás modificar j13 ProOne</Typography>}
-        {activeTab === 6 && <Typography>Aquí podrás modificar pachangas</Typography>}
-         {activeTab === 7 && <Typography>Aquí podrás modificar los cumpleaños</Typography>}
-        {activeTab === 8 && <Typography>Aquí podrás modificar patrocinadores</Typography>}
-        {activeTab === 9 && <Typography>Aquí podrás modificar como legar</Typography>}
-      </Box>
-    </Box>
+  {pages
+    .filter((p) => p.is_nav_group)
+    .map((p) => (
+      <MenuItem key={p.slug} value={p.slug}>
+        {p.title}
+      </MenuItem>
+    ))}
+</TextField>
+          )}
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={() => setOpenCreate(false)}>Cancelar</Button>
+
+          <Button variant="contained" onClick={createPage}>
+            Crear
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
