@@ -109,7 +109,6 @@ const [editTitle, setEditTitle] = useState("");
 const deletePage = async () => {
   if (!pageToDelete) return;
 
-  // 🔥 comprobar hijos
   const hasChildren = pages.some(
     (p) => p.parent_slug === pageToDelete
   );
@@ -121,37 +120,57 @@ const deletePage = async () => {
     return;
   }
 
-  // 🔥 borrar media
-  const { error: mediaError } = await supabase
-    .from("page_media")
-    .delete()
-    .eq("page_slug", pageToDelete);
+  try {
+    // 1. obtener media
+    const { data: media } = await supabase
+      .from("page_media")
+      .select("file_path")
+      .eq("page_slug", pageToDelete);
 
-  if (mediaError) {
-    console.error(mediaError);
-    setDeleteError("Error al eliminar los archivos asociados.");
-    return;
+    // 2. borrar storage
+    if (media?.length) {
+      const paths = media.map((m) => m.file_path);
+
+      const { error: storageError } = await supabase.storage
+        .from("pages")
+        .remove(paths);
+
+      if (storageError) {
+        console.error(storageError);
+        setDeleteError("Error eliminando archivos del storage.");
+        return;
+      }
+    }
+
+    // 3. borrar media en DB
+    await supabase
+      .from("page_media")
+      .delete()
+      .eq("page_slug", pageToDelete);
+
+    // 4. borrar página
+    const { error } = await supabase
+      .from("pages")
+      .delete()
+      .eq("slug", pageToDelete);
+
+    if (error) {
+      console.error(error);
+      setDeleteError("Error al eliminar la página.");
+      return;
+    }
+
+    setOpenDelete(false);
+    setPageToDelete(null);
+    setDeleteError(null);
+
+    await fetchPages();
+    setActiveSlug("carousel");
+
+  } catch (err) {
+    console.error(err);
+    setDeleteError("Error inesperado al eliminar.");
   }
-
-  // 🔥 borrar página
-  const { error } = await supabase
-    .from("pages")
-    .delete()
-    .eq("slug", pageToDelete);
-
-  if (error) {
-    console.error(error);
-    setDeleteError("Error al eliminar la página.");
-    return;
-  }
-
-  // éxito
-  setOpenDelete(false);
-  setPageToDelete(null);
-  setDeleteError(null);
-
-  await fetchPages();
-  setActiveSlug("carousel");
 };
 
 const updatePageTitle = async () => {
