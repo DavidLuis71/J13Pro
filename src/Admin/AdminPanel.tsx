@@ -47,6 +47,14 @@ const AdminPanel: React.FC = () => {
   const [isNavGroup, setIsNavGroup] = useState(false);
   const [parent, setParent] = useState<string | null>(null);
 
+  const [openDelete, setOpenDelete] = useState(false);
+const [pageToDelete, setPageToDelete] = useState<string | null>(null);
+const [deleteError, setDeleteError] = useState<string | null>(null);
+
+const [openEdit, setOpenEdit] = useState(false);
+const [pageToEdit, setPageToEdit] = useState<Page | null>(null);
+const [editTitle, setEditTitle] = useState("");
+
   // ---------------------------
   // LOAD PAGES
   // ---------------------------
@@ -80,6 +88,7 @@ const AdminPanel: React.FC = () => {
       content: isNavGroup ? null : "",
       is_nav_group: isNavGroup,
       parent_slug: parent,
+      is_main: !parent,
     });
 
     if (error) {
@@ -97,6 +106,76 @@ const AdminPanel: React.FC = () => {
     setActiveSlug(newSlug);
   };
 
+const deletePage = async () => {
+  if (!pageToDelete) return;
+
+  // 🔥 comprobar hijos
+  const hasChildren = pages.some(
+    (p) => p.parent_slug === pageToDelete
+  );
+
+  if (hasChildren) {
+    setDeleteError(
+      "No puedes eliminar esta página porque tiene subpáginas."
+    );
+    return;
+  }
+
+  // 🔥 borrar media
+  const { error: mediaError } = await supabase
+    .from("page_media")
+    .delete()
+    .eq("page_slug", pageToDelete);
+
+  if (mediaError) {
+    console.error(mediaError);
+    setDeleteError("Error al eliminar los archivos asociados.");
+    return;
+  }
+
+  // 🔥 borrar página
+  const { error } = await supabase
+    .from("pages")
+    .delete()
+    .eq("slug", pageToDelete);
+
+  if (error) {
+    console.error(error);
+    setDeleteError("Error al eliminar la página.");
+    return;
+  }
+
+  // éxito
+  setOpenDelete(false);
+  setPageToDelete(null);
+  setDeleteError(null);
+
+  await fetchPages();
+  setActiveSlug("carousel");
+};
+
+const updatePageTitle = async () => {
+  if (!pageToEdit) return;
+
+  const { error } = await supabase
+    .from("pages")
+    .update({
+      title: editTitle,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("slug", pageToEdit.slug);
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  setOpenEdit(false);
+  setPageToEdit(null);
+  setEditTitle("");
+
+  await fetchPages();
+};
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "#fff", p: 4 }}>
       <Header />
@@ -137,15 +216,64 @@ const AdminPanel: React.FC = () => {
         </Paper>
 
         {/* CONTENT */}
-        <Box>
-          {activeSlug === "carousel" ? (
-            <AdminCarouselUpload />
-          ) : activeSlug ? (
-            <AdminPageEditor slug={activeSlug} />
-          ) : (
-            <Typography>Cargando...</Typography>
-          )}
-        </Box>
+<Box>
+  {activeSlug === "carousel" ? (
+    <AdminCarouselUpload />
+  ) : activeSlug ? (
+<>
+  {/* HEADER DEL CONTENIDO */}
+  <Box
+    sx={{
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      mb: 2,
+    }}
+  >
+    {/* TITULO */}
+    <Typography variant="h4">
+      {pages.find((p) => p.slug === activeSlug)?.title}
+    </Typography>
+
+    {/* BOTONES */}
+    <Box sx={{ display: "flex", gap: 1 }}>
+      <Button
+        size="small"
+         variant="contained"
+        onClick={() => {
+          const page = pages.find((p) => p.slug === activeSlug);
+          if (!page) return;
+
+          setPageToEdit(page);
+          setEditTitle(page.title || "");
+          setOpenEdit(true);
+        }}
+      >
+        Renombrar
+      </Button>
+
+      <Button
+        size="small"
+         variant="contained"
+        color="error"
+        onClick={() => {
+          setPageToDelete(activeSlug);
+          setDeleteError(null);
+          setOpenDelete(true);
+        }}
+      >
+        Eliminar
+      </Button>
+    </Box>
+  </Box>
+
+  {/* EDITOR */}
+  <AdminPageEditor slug={activeSlug} />
+</>
+  ) : (
+    <Typography>Cargando...</Typography>
+  )}
+</Box>
       </Box>
 
       {/* CREATE PAGE MODAL */}
@@ -189,7 +317,20 @@ const AdminPanel: React.FC = () => {
             }
             label="Es grupo de navegación (no tiene contenido)"
           />
-
+{isNavGroup && (
+  <Typography
+    variant="body2"
+    sx={{
+      mt: 1,
+      color: "warning.main",
+      backgroundColor: "#fff3cd",
+      p: 1,
+      borderRadius: 1,
+    }}
+  >
+    ⚠️ Este grupo no aparecerá en el menú hasta que tenga al menos una subpágina dentro.
+  </Typography>
+)}
           {/* PARENT SELECT */}
           {!isNavGroup && (
            <TextField
@@ -225,6 +366,74 @@ const AdminPanel: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
+      <Dialog open={openDelete} onClose={() => setOpenDelete(false)}>
+  <DialogTitle>Eliminar página</DialogTitle>
+
+  <DialogContent>
+    <Typography>
+      ¿Seguro que quieres eliminar{" "}
+      <strong>
+        {pages.find((p) => p.slug === pageToDelete)?.title}
+      </strong>
+      ?
+    </Typography>
+
+    <Typography sx={{ mt: 1 }} color="error">
+      Esta acción no se puede deshacer.
+    </Typography>
+
+    {deleteError && (
+      <Typography sx={{ mt: 2 }} color="error">
+        {deleteError}
+      </Typography>
+    )}
+  </DialogContent>
+
+  <DialogActions>
+    <Button onClick={() => setOpenDelete(false)}>
+      Cancelar
+    </Button>
+
+    <Button
+      variant="contained"
+      color="error"
+      onClick={deletePage}
+    >
+      Eliminar
+    </Button>
+  </DialogActions>
+</Dialog>
+<Dialog open={openEdit} onClose={() => setOpenEdit(false)}>
+  <DialogTitle >Editar nombre de la página</DialogTitle>
+
+  <DialogContent>
+    <TextField
+      fullWidth
+      label="Nombre visible"
+      value={editTitle}
+      onChange={(e) => setEditTitle(e.target.value)}
+       sx={{
+    mt: 2,
+    backgroundColor: "#fff",
+    borderRadius: 1,
+  }}
+    />
+
+    <Typography sx={{ mt: 2 }} color="whitte">
+      Este es el nombre que aparecerá en el menú y en los tabs.
+    </Typography>
+  </DialogContent>
+
+  <DialogActions>
+    <Button onClick={() => setOpenEdit(false)}>
+      Cancelar
+    </Button>
+
+    <Button variant="contained" onClick={updatePageTitle}>
+      Guardar
+    </Button>
+  </DialogActions>
+</Dialog>
     </Box>
   );
 };

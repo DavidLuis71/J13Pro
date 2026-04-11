@@ -173,9 +173,9 @@ const AdminPageEditor: React.FC<Props> = ({ slug, title }) => {
 
   return (
     <Box sx={{ p: 4 }}>
-      <Typography variant="h4">
+      {/* <Typography variant="h4">
         {title || slug}
-      </Typography>
+      </Typography> */}
 
       {/* CONTENT */}
       <Typography variant="h6" sx={{ mt: 3 }}>

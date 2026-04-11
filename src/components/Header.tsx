@@ -17,9 +17,8 @@ import MenuIcon from "@mui/icons-material/Menu";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-
 import { supabase } from "../api/supabaseClient";
 
 import logo from "../assets/logo.png";
@@ -33,41 +32,73 @@ interface Page {
   parent_slug: string | null;
 }
 
-export default function Header() {
-  const [open, setOpen] = useState(false);
+const staticPages = [
+  { label: "Admin", path: "/admin" },
+  { label: "Contáctanos", path: "/contacto" },
+  { label: "Alquiler", path: "/alquiler" },
+  { label: "Patrocinadores", path: "/patrocinadores" },
+  { label: "Cómo llegar", path: "/como-llegar" },
+];
 
-  const [openMenuSlug, setOpenMenuSlug] = useState<string | null>(null);
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+export default function Header() {
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  // DESKTOP MENU STATE
+  const [desktopMenuSlug, setDesktopMenuSlug] = useState<string | null>(null);
+  const [desktopAnchor, setDesktopAnchor] = useState<HTMLElement | null>(null);
+
+  // MOBILE MENU STATE
+  const [mobileMenuSlug, setMobileMenuSlug] = useState<string | null>(null);
 
   const [pages, setPages] = useState<Page[]>([]);
 
-  const openMenu = Boolean(anchorEl);
-
-  // -----------------------
-  // FETCH CMS PAGES
-  // -----------------------
+  // ---------------- FETCH PAGES ----------------
   useEffect(() => {
     const fetchPages = async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("pages")
         .select("id, slug, title, is_nav_group, parent_slug");
 
-      if (data) setPages(data);
+      if (error) {
+        console.error(error);
+        return;
+      }
+
+      setPages(data || []);
     };
 
     fetchPages();
   }, []);
 
-  // 🔥 PADRES
-  const navGroups = pages.filter((p) => p.is_nav_group);
+  // ---------------- DERIVED DATA ----------------
+  const { navGroups, mainPages, childrenMap } = useMemo(() => {
+    const navGroups = pages.filter((p) => p.is_nav_group);
+
+    const mainPages = pages.filter(
+      (p) => !p.is_nav_group && !p.parent_slug
+    );
+
+    const childrenMap = pages.reduce((acc, p) => {
+      if (!p.parent_slug) return acc;
+      if (!acc[p.parent_slug]) acc[p.parent_slug] = [];
+      acc[p.parent_slug].push(p);
+      return acc;
+    }, {} as Record<string, Page[]>);
+
+    return { navGroups, mainPages, childrenMap };
+  }, [pages]);
 
   return (
     <>
-      <AppBar position="sticky" sx={{ background: "#000", width: "100%" }}>
+      <AppBar position="sticky" sx={{ background: "#000" }}>
         <Toolbar>
           {/* LOGO */}
           <Box sx={{ flexGrow: 1, display: "flex", alignItems: "center", gap: 1 }}>
-            <img src={logo} alt="Logo" style={{ width: 50, height: 50, borderRadius: "50%" }} />
+            <img
+              src={logo}
+              alt="Logo"
+              style={{ width: 50, height: 50, borderRadius: "50%" }}
+            />
             <img
               src={sinfondo}
               alt="Texto"
@@ -80,47 +111,43 @@ export default function Header() {
 
           {/* ---------------- DESKTOP ---------------- */}
           <Box sx={{ display: { xs: "none", md: "flex" }, gap: 2 }}>
-            <Button color="inherit" component={Link} to="/">
+            <Button component={Link} to="/" color="inherit">
               Inicio
             </Button>
 
-            <Button color="inherit" component={Link} to="/admin">
-              Admin
-            </Button>
+            {mainPages.map((page) => (
+              <Button
+                key={page.slug}
+                component={Link}
+                to={`/${page.slug}`}
+                color="inherit"
+              >
+                {page.title}
+              </Button>
+            ))}
 
-            <Button color="inherit" component={Link} to="/contacto">
-              Contáctanos
-            </Button>
-
-            <Button color="inherit" component={Link} to="/alquiler">
-              Alquiler
-            </Button>
-
-            {/* NAV GROUPS */}
             {navGroups.map((group) => {
-              const children = pages.filter(
-                (p) => p.parent_slug === group.slug
-              );
+              const children = childrenMap[group.slug] || [];
+              if (children.length === 0) return null;
 
               return (
                 <div key={group.slug}>
                   <Button
                     color="inherit"
                     onClick={(e) => {
-                      setAnchorEl(e.currentTarget);
-                      setOpenMenuSlug(group.slug);
+                      setDesktopAnchor(e.currentTarget);
+                      setDesktopMenuSlug(group.slug);
                     }}
                   >
                     {group.title}
                   </Button>
 
-                  {/* DROPDOWN SOLO PARA ESTE GRUPO */}
                   <Menu
-                    anchorEl={anchorEl}
-                    open={openMenu && openMenuSlug === group.slug}
+                    anchorEl={desktopAnchor}
+                    open={desktopMenuSlug === group.slug}
                     onClose={() => {
-                      setAnchorEl(null);
-                      setOpenMenuSlug(null);
+                      setDesktopAnchor(null);
+                      setDesktopMenuSlug(null);
                     }}
                   >
                     {children.map((p) => (
@@ -129,8 +156,8 @@ export default function Header() {
                         component={Link}
                         to={`/${p.slug}`}
                         onClick={() => {
-                          setAnchorEl(null);
-                          setOpenMenuSlug(null);
+                          setDesktopAnchor(null);
+                          setDesktopMenuSlug(null);
                         }}
                       >
                         {p.title}
@@ -141,60 +168,71 @@ export default function Header() {
               );
             })}
 
-            <Button color="inherit" component={Link} to="/patrocinadores">
-              Patrocinadores
-            </Button>
-
-            <Button color="inherit" component={Link} to="/como-llegar">
-              Cómo llegar
-            </Button>
+            {staticPages.map((p) => (
+              <Button
+                key={p.path}
+                component={Link}
+                to={p.path}
+                color="inherit"
+              >
+                {p.label}
+              </Button>
+            ))}
           </Box>
 
-          {/* ---------------- MOBILE ---------------- */}
+          {/* ---------------- MOBILE BUTTON ---------------- */}
           <IconButton
             color="inherit"
             edge="end"
             sx={{ display: { xs: "block", md: "none" } }}
-            onClick={() => setOpen(true)}
+            onClick={() => setDrawerOpen(true)}
           >
             <MenuIcon />
           </IconButton>
         </Toolbar>
       </AppBar>
 
-      {/* ---------------- DRAWER MOBILE ---------------- */}
-      <Drawer anchor="right" open={open} onClose={() => setOpen(false)}>
+      {/* ---------------- MOBILE DRAWER ---------------- */}
+      <Drawer
+        anchor="right"
+        open={drawerOpen}
+        onClose={() => {
+          setDrawerOpen(false);
+          setMobileMenuSlug(null);
+        }}
+      >
         <Box sx={{ width: { xs: "80vw", sm: 250 } }}>
-          <List sx={{ width: 250 }}>
-            <ListItemButton component={Link} to="/">
+          <List>
+            <ListItemButton
+              component={Link}
+              to="/"
+              onClick={() => setDrawerOpen(false)}
+            >
               <ListItemText primary="Inicio" />
             </ListItemButton>
 
-            <ListItemButton component={Link} to="/admin">
-              <ListItemText primary="Admin" />
-            </ListItemButton>
+            {mainPages.map((page) => (
+              <ListItemButton
+                key={page.slug}
+                component={Link}
+                to={`/${page.slug}`}
+                onClick={() => setDrawerOpen(false)}
+              >
+                <ListItemText primary={page.title} />
+              </ListItemButton>
+            ))}
 
-            <ListItemButton component={Link} to="/contacto">
-              <ListItemText primary="Contáctanos" />
-            </ListItemButton>
-
-            <ListItemButton component={Link} to="/alquiler">
-              <ListItemText primary="Alquiler" />
-            </ListItemButton>
-
-            {/* NAV GROUPS MOBILE (FIX REAL) */}
             {navGroups.map((group) => {
-              const isOpen = openMenuSlug === group.slug;
+              const isOpen = mobileMenuSlug === group.slug;
+              const children = childrenMap[group.slug] || [];
 
-              const children = pages.filter(
-                (p) => p.parent_slug === group.slug
-              );
+              if (children.length === 0) return null;
 
               return (
                 <div key={group.slug}>
                   <ListItemButton
                     onClick={() =>
-                      setOpenMenuSlug(isOpen ? null : group.slug)
+                      setMobileMenuSlug(isOpen ? null : group.slug)
                     }
                   >
                     <ListItemText primary={group.title} />
@@ -209,7 +247,10 @@ export default function Header() {
                           sx={{ pl: 4 }}
                           component={Link}
                           to={`/${p.slug}`}
-                          onClick={() => setOpen(false)}
+                          onClick={() => {
+                            setDrawerOpen(false);
+                            setMobileMenuSlug(null);
+                          }}
                         >
                           <ListItemText primary={p.title} />
                         </ListItemButton>
@@ -220,13 +261,16 @@ export default function Header() {
               );
             })}
 
-            <ListItemButton component={Link} to="/patrocinadores">
-              <ListItemText primary="Patrocinadores" />
-            </ListItemButton>
-
-            <ListItemButton component={Link} to="/como-llegar">
-              <ListItemText primary="Cómo llegar" />
-            </ListItemButton>
+            {staticPages.map((p) => (
+              <ListItemButton
+                key={p.path}
+                component={Link}
+                to={p.path}
+                onClick={() => setDrawerOpen(false)}
+              >
+                <ListItemText primary={p.label} />
+              </ListItemButton>
+            ))}
           </List>
         </Box>
       </Drawer>
