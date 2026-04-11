@@ -97,9 +97,11 @@ const Carousel: React.FC<CarouselProps> = ({ pageSlug }) => {
       sx={{
         position: "relative",
         width: "100%",
-        height: 400,
+        height: {
+        xs: 350, // móviles
+        md: 500, // tablets y web
+      },
         overflow: "hidden",
-        borderRadius: 2,
       }}
     >
       {/* SLIDES */}
