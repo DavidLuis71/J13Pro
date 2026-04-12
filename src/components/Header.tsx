@@ -187,7 +187,7 @@ export default function Header() {
             sx={{ display: { xs: "block", md: "none" } }}
             onClick={() => setDrawerOpen(true)}
           >
-            <MenuIcon />
+            <MenuIcon sx={{ color: "var(--gold)" }} />
           </IconButton>
         </Toolbar>
       </AppBar>
@@ -200,8 +200,20 @@ export default function Header() {
           setDrawerOpen(false);
           setMobileMenuSlug(null);
         }}
+        slotProps={{
+    paper: {
+      sx: {
+        width: 160,
+        maxWidth: "50vw",
+        backgroundColor: "var(--black-text-bg)",
+        color: "var(--gold)",
+       
+      },
+    },
+  }}
+       
       >
-        <Box sx={{ width: { xs: "80vw", sm: 250 } }}>
+        <Box sx={{ width: 260, maxWidth: "80vw" }}>
           <List>
             <ListItemButton
               component={Link}

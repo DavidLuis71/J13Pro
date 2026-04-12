@@ -269,10 +269,7 @@ h1, h2, h3, h4, h5, h6 {
   background-color: rgba(255, 215, 0, 0.2);
 }
 
-.MuiListItemText-root {
-  font-weight: bold;
-  color: var(--black);
-}
+
 
 .MuiCollapse-wrapperInner .MuiListItemButton-root {
   padding-left: 32px !important;
@@ -291,16 +288,6 @@ h1, h2, h3, h4, h5, h6 {
 .MuiMenuItem-root:hover {
   background: var(--gold);
   color: var(--black);
-}
-
-/* Iconos de menú móvil */
-.MuiSvgIcon-root {
-  color: var(--gold);
-  transition: color 0.3s;
-}
-
-.MuiSvgIcon-root:hover {
-  color: var(--orange);
 }
 
 /* 🔹 Media queries para mobile */

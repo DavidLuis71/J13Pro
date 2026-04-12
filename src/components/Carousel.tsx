@@ -20,8 +20,7 @@ const Carousel: React.FC<CarouselProps> = ({ pageSlug }) => {
   const [isInteracting, setIsInteracting] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-
+ const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const fetchItems = async () => {
     setLoading(true);
 

@@ -7,7 +7,7 @@ import Carousel from "../components/Carousel";
 
 export default function BabyPro() {
   const [content, setContent] = useState("");
-  const [media, setMedia] = useState<any[]>([]);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -39,7 +39,7 @@ export default function BabyPro() {
       if (mediaError) {
         console.error(mediaError);
       } else {
-        setMedia(mediaData || []);
+       console.log(mediaData)
       }
 
       setLoading(false);

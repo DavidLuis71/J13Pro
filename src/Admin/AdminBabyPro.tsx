@@ -188,7 +188,10 @@ const AdminBabyPro: React.FC = () => {
       <Input
         type="file"
         inputProps={{ multiple: true }}
-        onChange={(e) => setFiles(Array.from(e.target.files || []))}
+       onChange={(e) => {
+  const target = e.target as HTMLInputElement;
+  setFiles(Array.from(target.files || []));
+}}
       />
 
       {files.length > 0 && (

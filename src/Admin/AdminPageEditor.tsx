@@ -28,7 +28,7 @@ interface Props {
   title?: string;
 }
 
-const AdminPageEditor: React.FC<Props> = ({ slug, title }) => {
+const AdminPageEditor: React.FC<Props> = ({ slug }) => {
   const [content, setContent] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [media, setMedia] = useState<MediaItem[]>([]);
@@ -207,7 +207,10 @@ const AdminPageEditor: React.FC<Props> = ({ slug, title }) => {
       <Input
         type="file"
         inputProps={{ multiple: true }}
-        onChange={(e) => setFiles(Array.from(e.target.files || []))}
+       onChange={(e) => {
+  const target = e.target as HTMLInputElement;
+  setFiles(Array.from(target.files || []));
+}}
       />
 
       <Button

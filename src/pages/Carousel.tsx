@@ -9,7 +9,7 @@ interface HeroImage {
 const Carousel: React.FC = () => {
   const [images, setImages] = useState<HeroImage[]>([]);
   const [current, setCurrent] = useState<number>(0);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+ const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
   const fetchImages = async () => {

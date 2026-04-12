@@ -110,7 +110,9 @@ const AdminCarouselUpload: React.FC = () => {
       <Box sx={{ marginBottom: 3 }}>
         <Input
           type="file"
-          onChange={e => setFile(e.target.files?.[0] || null)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+  setFile(e.target.files?.[0] || null)
+}
           disabled={uploading}
         />
 <Button
