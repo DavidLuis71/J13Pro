@@ -3,27 +3,27 @@ import { useState } from "react";
 import Header from "../components/Header";
 import Carousel from "./Carousel";
 import Footer from "../components/Footer";
+import StarIcon from "@mui/icons-material/Star";
 
 export default function Index() {
-  const [openModal, setOpenModal] = useState(true); // Modal abierto al cargar
+  const [openModal, setOpenModal] = useState(true);
 
   return (
-  <Box sx={{ width: '100vw', overflowX: 'hidden' }}>
+    <Box sx={{ width: '100vw', overflowX: 'hidden' }}>
       <Header />
-<Carousel />
-      {/* MODAL RESPONSIVE */}
+      <Carousel />
+
+      {/* MODAL */}
       <Dialog
         open={openModal}
         onClose={() => setOpenModal(false)}
         sx={{
-    
-            width: '90vw',       // ancho máximo 90% del viewport
-            maxWidth: '400px',   // no más ancho que 400px
-            maxHeight: '80vh',   // no más alto que 80% de la pantalla
-            overflowY: 'auto',   // scroll interno si el contenido es muy largo
-            mx: 'auto',          // centrar horizontalmente
-            borderRadius: 2
-  
+          width: '90vw',
+          maxWidth: '400px',
+          maxHeight: '80vh',
+          overflowY: 'auto',
+          mx: 'auto',
+          borderRadius: 2
         }}
       >
         <DialogTitle>¡Información Actualizada!</DialogTitle>
@@ -39,16 +39,11 @@ export default function Index() {
             href="https://www.instagram.com/j13pro_/"
             target="_blank"
             variant="contained"
-            color="primary"
           >
             Ir a Instagram
           </Button>
         </DialogActions>
       </Dialog>
-
-
-
-
 
       {/* SERVICIOS */}
       <section className="services">
@@ -83,8 +78,52 @@ export default function Index() {
         </Button>
       </Box>
 
-      {/* FOOTER */}
-     <Footer/>
+      {/* ⭐ RESEÑAS (NUEVO BLOQUE PRO) */}
+      <Box
+        sx={{
+          textAlign: "center",
+          py: 5,
+          px: 2,
+          background: "linear-gradient(180deg, #111, #000)",
+          color: "white",
+        }}
+      >
+        <Box sx={{ display: "flex", justifyContent: "center", mb: 1 }}>
+          {[...Array(5)].map((_, i) => (
+            <StarIcon key={i} sx={{ color: "var(--gold)", fontSize: 28 }} />
+          ))}
+        </Box>
+
+        <Typography variant="h5" sx={{ color: "var(--gold)", mb: 1 }}>
+          ¿Te ha gustado la experiencia?
+        </Typography>
+
+        <Typography sx={{ mb: 2 }}>
+          Tu opinión nos ayuda a seguir creciendo 🚀
+        </Typography>
+
+        <Button
+          variant="contained"
+          component="a"
+          href="https://g.page/r/Ccos0LgLSRUuEBM/review"
+          target="_blank"
+          sx={{
+            backgroundColor: "var(--orange)",
+            fontWeight: "bold",
+            px: 4,
+            py: 1.2,
+            borderRadius: 3,
+            "&:hover": {
+              backgroundColor: "var(--gold)",
+              color: "#000",
+            },
+          }}
+        >
+          Puntuanos
+        </Button>
+      </Box>
+
+      <Footer />
     </Box>
   );
 }

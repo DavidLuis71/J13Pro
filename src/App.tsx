@@ -7,6 +7,8 @@ import "./App.css";
 import Background from "./components/Background";
 import PageRenderer from "./pages/PageRenderer";
 import Contacto from "./pages/Contact";
+import Direction from "./pages/Direction";
+import Galery from "./pages/Galery"
 
 function App() {
   return (
@@ -18,6 +20,8 @@ function App() {
       <Route path="/legal" element={<Legal />} /> 
       <Route path="/baby" element={<Baby />} /> 
       <Route path="/contacto" element={<Contacto />} /> 
+      <Route path="/direction" element={<Direction/>}/>
+        <Route path="/galery" element={<Galery/>}/>
        <Route path="/:slug" element={<PageRenderer />} />
     </Routes>
     </Router>

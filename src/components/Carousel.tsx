@@ -30,9 +30,6 @@ const Carousel: React.FC<CarouselProps> = ({ pageSlug }) => {
       .eq("page_slug", pageSlug)
       .order("order_index", { ascending: true });
 
-    console.log("PAGE SLUG:", pageSlug);
-    console.log("ITEMS:", data);
-
     if (error) {
       console.error("Error loading media:", error);
       setItems([]);

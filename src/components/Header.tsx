@@ -36,8 +36,9 @@ const staticPages = [
   { label: "Admin", path: "/admin" },
   { label: "Contáctanos", path: "/contacto" },
   { label: "Alquiler", path: "/alquiler" },
+  { label: "Galeria", path: "/galery" },
   { label: "Patrocinadores", path: "/patrocinadores" },
-  { label: "Cómo llegar", path: "/como-llegar" },
+  { label: "Cómo llegar", path: "/direction" },
 ];
 
 export default function Header() {
@@ -213,7 +214,7 @@ export default function Header() {
   }}
        
       >
-        <Box sx={{ width: 260, maxWidth: "80vw" }}>
+        <Box sx={{ width: 160, maxWidth: "70vw"}}>
           <List>
             <ListItemButton
               component={Link}
@@ -246,9 +247,14 @@ export default function Header() {
                     onClick={() =>
                       setMobileMenuSlug(isOpen ? null : group.slug)
                     }
+                    
                   >
                     <ListItemText primary={group.title} />
-                    {isOpen ? <ExpandLess /> : <ExpandMore />}
+                 {isOpen ? (
+  <ExpandLess sx={{ color: "var(--gold)" }} />
+) : (
+  <ExpandMore sx={{ color: "var(--gold)" }} />
+)}
                   </ListItemButton>
 
                   <Collapse in={isOpen} timeout="auto" unmountOnExit>

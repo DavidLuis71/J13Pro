@@ -173,7 +173,13 @@ const AdminCarouselUpload: React.FC = () => {
             sx={{ position: "absolute", top: 4, right: 4 }}
             onClick={() => handleDelete(img.id, img.url.split("/").slice(-1)[0])}
           >
-            <DeleteIcon fontSize="small" sx={{ color: "var(--gold)" }} />
+            <DeleteIcon
+  fontSize="small"
+  sx={{
+    color: "var(--gold)",
+    filter: "drop-shadow(1px 1px 2px black)",
+  }}
+/>
           </IconButton>
         </Paper>
       </Grid>

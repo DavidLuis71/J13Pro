@@ -237,7 +237,13 @@ const AdminPageEditor: React.FC<Props> = ({ slug }) => {
                 onClick={() => handleDelete(item)}
                 sx={{ position: "absolute", top: 5, right: 5 }}
               >
-                <DeleteIcon />
+                <DeleteIcon
+  fontSize="small"
+  sx={{
+    color: "var(--gold)",
+    filter: "drop-shadow(1px 1px 2px black)",
+  }}
+/>
               </IconButton>
             </Paper>
           </Grid>

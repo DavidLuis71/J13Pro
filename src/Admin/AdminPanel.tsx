@@ -20,6 +20,8 @@ import {
 import Header from "../components/Header";
 import AdminPageEditor from "./AdminPageEditor";
 import AdminCarouselUpload from "./AdminCarouselUpload";
+import AdminGallery from "./AdminGallery";
+import { PhotoLibrary } from "@mui/icons-material";
 
 interface Page {
   id: string;
@@ -196,10 +198,10 @@ const updatePageTitle = async () => {
   await fetchPages();
 };
   return (
-    <Box sx={{ minHeight: "100vh", bgcolor: "#fff", p: 4 }}>
+    <Box sx={{ minHeight: "100vh", bgcolor: "#fff"}}>
       <Header />
 
-      <Box sx={{ mt: 3, display: "flex", flexDirection: "column", gap: 3 }}>
+      <Box sx={{ mt: 3, display: "flex", flexDirection: "column", gap: 3,paddingLeft:"10px",paddingRight:"10px" }}>
 
         {/* HEADER ACTIONS */}
         <Box sx={{ display: "flex", justifyContent: "space-between" }}>
@@ -220,7 +222,11 @@ const updatePageTitle = async () => {
           >
             {/* FIJO */}
             <Tab value="carousel" label="Carrusel Inicio" />
-
+<Tab
+  value="galeria"
+  label="Galería"
+  icon={<PhotoLibrary />}
+/>
             {/* SOLO PÁGINAS REALES (NO NAV GROUPS) */}
             {pages
               .filter((p) => !p.is_nav_group)
@@ -236,9 +242,11 @@ const updatePageTitle = async () => {
 
         {/* CONTENT */}
 <Box>
-  {activeSlug === "carousel" ? (
-    <AdminCarouselUpload />
-  ) : activeSlug ? (
+{activeSlug === "carousel" ? (
+  <AdminCarouselUpload />
+) : activeSlug === "galeria" ? (
+  <AdminGallery />  
+) : activeSlug ? (
 <>
   {/* HEADER DEL CONTENIDO */}
   <Box
