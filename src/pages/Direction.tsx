@@ -11,8 +11,6 @@ import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import InfoIcon from "@mui/icons-material/Info";
 
 import { useState } from "react";
-import Header from "../components/Header";
-import Footer from "../components/Footer";
 
 export default function ComoLlegar() {
   const [tab, setTab] = useState("bus");
@@ -98,7 +96,7 @@ export default function ComoLlegar() {
 
   return (
     <Box sx={{ width: "100vw", overflowX: "hidden" }}>
-      <Header />
+      
 
       {/* HERO */}
       <Box sx={heroStyle}>
@@ -172,7 +170,7 @@ export default function ComoLlegar() {
         </Paper>
       </Box>
 
-      <Footer />
+      
     </Box>
   );
 }

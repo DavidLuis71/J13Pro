@@ -1,11 +1,8 @@
 import { Box, Typography } from "@mui/material";
-import Header from "../components/Header";
-import Footer from "../components/Footer";
-
 export default function Legal() {
   return (
     <Box sx={{ width: "100vw", overflowX: "hidden" }}>
-      <Header />
+      
 
       <Box
         sx={{
@@ -102,7 +99,7 @@ export default function Legal() {
         </Typography>
       </Box>
 
-      <Footer />
+      
     </Box>
   );
 }

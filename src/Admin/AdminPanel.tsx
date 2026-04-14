@@ -17,11 +17,10 @@ import {
   MenuItem,
 } from "@mui/material";
 
-import Header from "../components/Header";
 import AdminPageEditor from "./AdminPageEditor";
 import AdminCarouselUpload from "./AdminCarouselUpload";
 import AdminGallery from "./AdminGallery";
-import { PhotoLibrary } from "@mui/icons-material";
+import AdminSponsors from "./AdminSponsors";
 
 interface Page {
   id: string;
@@ -199,7 +198,7 @@ const updatePageTitle = async () => {
 };
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "#fff"}}>
-      <Header />
+      
 
       <Box sx={{ mt: 3, display: "flex", flexDirection: "column", gap: 3,paddingLeft:"10px",paddingRight:"10px" }}>
 
@@ -225,8 +224,9 @@ const updatePageTitle = async () => {
 <Tab
   value="galeria"
   label="Galería"
-  icon={<PhotoLibrary />}
+
 />
+<Tab value="sponsors" label="Sponsors" />
             {/* SOLO PÁGINAS REALES (NO NAV GROUPS) */}
             {pages
               .filter((p) => !p.is_nav_group)
@@ -247,6 +247,9 @@ const updatePageTitle = async () => {
 ) : activeSlug === "galeria" ? (
   <AdminGallery />  
 ) : activeSlug ? (
+  activeSlug === "sponsors" ? (
+  <AdminSponsors />
+) :
 <>
   {/* HEADER DEL CONTENIDO */}
   <Box

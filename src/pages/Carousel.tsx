@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../api/supabaseClient";
+import basketball from "../assets/basketball.png";
 
 interface HeroImage {
   url: string;
@@ -63,7 +64,30 @@ const Carousel: React.FC = () => {
     };
   }, [current, images]);
 
-  if (images.length === 0) return <p>Cargando carrusel...</p>;
+if (images.length === 0) {
+
+  return (
+    <div
+      style={{
+        height: "400px",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "#000",
+      }}
+    >
+      <img
+        src={basketball}
+        alt="Cargando"
+        style={{
+          width: "80px",
+          height: "80px",
+          animation: "ballBounce 0.8s infinite alternate",
+        }}
+      />
+    </div>
+  );
+}
 
   return (
     <div className="hero-carousel">

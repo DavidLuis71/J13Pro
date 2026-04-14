@@ -7,8 +7,6 @@ import {
   Alert,
   CircularProgress,
 } from "@mui/material";
-import Header from "../components/Header";
-import Footer from "../components/Footer";
 
 export default function Contacto() {
   const [form, setForm] = useState({
@@ -80,7 +78,7 @@ export default function Contacto() {
     <Box sx={{ width: "100vw", overflowX: "hidden" }}>
       
       {/* 👇 HEADER */}
-      <Header />
+      
 
       {/* CONTENIDO */}
       <Box
@@ -185,7 +183,7 @@ export default function Contacto() {
       </Box>
 
       {/* 👇 FOOTER (opcional) */}
-      <Footer />
+      
     </Box>
   );
 }

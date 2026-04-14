@@ -35,9 +35,8 @@ interface Page {
 const staticPages = [
   { label: "Admin", path: "/admin" },
   { label: "Contáctanos", path: "/contacto" },
-  { label: "Alquiler", path: "/alquiler" },
   { label: "Galeria", path: "/galery" },
-  { label: "Patrocinadores", path: "/patrocinadores" },
+  { label: "Patrocinadores", path: "/sponsors" },
   { label: "Cómo llegar", path: "/direction" },
 ];
 
@@ -57,8 +56,9 @@ export default function Header() {
   useEffect(() => {
     const fetchPages = async () => {
       const { data, error } = await supabase
-        .from("pages")
-        .select("id, slug, title, is_nav_group, parent_slug");
+  .from("pages")
+  .select("id, slug, title, is_nav_group, parent_slug, order_index")
+  .order("order_index", { ascending: true });
 
       if (error) {
         console.error(error);
@@ -112,7 +112,7 @@ export default function Header() {
 
           {/* ---------------- DESKTOP ---------------- */}
           <Box sx={{ display: { xs: "none", md: "flex" }, gap: 2 }}>
-            <Button component={Link} to="/" color="inherit">
+            <Button component={Link} to="/" color="inherit" >
               Inicio
             </Button>
 

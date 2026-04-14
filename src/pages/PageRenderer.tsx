@@ -2,9 +2,6 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Box, Typography } from "@mui/material";
 import { supabase } from "../api/supabaseClient";
-
-import Header from "../components/Header";
-import Footer from "../components/Footer";
 import Carousel from "../components/Carousel";
 
 export default function PageRenderer() {
@@ -39,7 +36,7 @@ export default function PageRenderer() {
 
   return (
     <Box sx={{ width: "100vw", overflowX: "hidden" }}>
-      <Header />
+      
 
       {/* Carrusel dinámico */}
       {slug && <Carousel pageSlug={slug} />}
@@ -70,7 +67,7 @@ export default function PageRenderer() {
         )}
       </Box>
 
-      <Footer />
+      
     </Box>
   );
 }

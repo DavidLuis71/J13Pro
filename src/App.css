@@ -246,15 +246,12 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .MuiButton-root {
-  color: var(--white) !important;
+  /* color: var(--white) !important; */
   font-weight: bold;
   transition: all 0.3s;
 }
 
-.MuiButton-root:hover {
-  color: var(--gold) !important;
-  transform: scale(1.05);
-}
+
 
 .MuiDrawer-paper {
   background: var(--black);
@@ -342,3 +339,12 @@ h1, h2, h3, h4, h5, h6 {
   font-size: 1rem;
 }
 
+
+@keyframes ballBounce {
+  0% {
+    transform: translateY(0) scale(1, 0.9) ;
+  }
+  100% {
+    transform: translateY(-80px) scale(1, 1);
+  }
+}

@@ -11,9 +11,6 @@ import {
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CloseIcon from "@mui/icons-material/Close";
 
-import Header from "../components/Header";
-import Footer from "../components/Footer";
-
 interface Album {
   id: string;
   name: string;
@@ -80,7 +77,7 @@ export default function Gallery() {
   return (
     <Box sx={{ width: "100vw", minHeight: "100vh", overflowX: "hidden" }}>
       
-      <Header />
+      
 
       {/*
       <Box
@@ -280,7 +277,7 @@ export default function Gallery() {
         </DialogContent>
       </Dialog>
 
-      <Footer />
+      
     </Box>
   );
 }

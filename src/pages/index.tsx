@@ -1,8 +1,6 @@
 import { Box, Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography } from "@mui/material";
 import { useState } from "react";
-import Header from "../components/Header";
 import Carousel from "./Carousel";
-import Footer from "../components/Footer";
 import StarIcon from "@mui/icons-material/Star";
 
 export default function Index() {
@@ -10,7 +8,7 @@ export default function Index() {
 
   return (
     <Box sx={{ width: '100vw', overflowX: 'hidden' }}>
-      <Header />
+      
       <Carousel />
 
       {/* MODAL */}
@@ -56,74 +54,94 @@ export default function Index() {
         </div>
       </section>
 
-      {/* CTA */}
-      <Box
-        sx={{
-          textAlign: "center",
-          py: 6,
-          backgroundColor: "#111",
-          color: "white",
-        }}
-      >
-        <Typography variant="h5">¿Estás list@?</Typography>
-        <Typography variant="h6" sx={{ mb: 2 }}>
-          ¡Vamos a por todas!
-        </Typography>
-        <Typography sx={{ mb: 3 }}>
-          Déjanos tus datos y te llamaremos a la mayor brevedad posible
-        </Typography>
+    {/* CONTENEDOR RESPONSIVE */}
+<Box
+  sx={{
+    display: "flex",
+    flexDirection: { xs: "column", md: "row" }, // 👈 clave
+  }}
+>
+  {/* CTA */}
+  <Box
+    sx={{
+      flex: 1,
+      textAlign: "center",
+      py: 6,
+      backgroundColor: "#111",
+      color: "white",
+    }}
+  >
+    <Typography variant="h5">¿Estás list@?</Typography>
+    <Typography variant="h6" sx={{ mb: 2 }}>
+      ¡Vamos a por todas!
+    </Typography>
+    <Typography sx={{ mb: 3 }}>
+      Déjanos tus datos y te llamaremos a la mayor brevedad posible
+    </Typography>
 
-        <Button variant="contained" color="primary">
-          CONTACTA
-        </Button>
-      </Box>
+    <Button variant="contained"  sx={{
+        backgroundColor: "var(--orange)",
+        fontWeight: "bold",
+        px: 4,
+        py: 1.2,
+        borderRadius: 3,
+        "&:hover": {
+          backgroundColor: "var(--gold)",
+          color: "#000",
+        },
+      }}>
+      CONTACTA
+    </Button>
+  </Box>
 
-      {/* ⭐ RESEÑAS (NUEVO BLOQUE PRO) */}
-      <Box
-        sx={{
-          textAlign: "center",
-          py: 5,
-          px: 2,
-          background: "linear-gradient(180deg, #111, #000)",
-          color: "white",
-        }}
-      >
-        <Box sx={{ display: "flex", justifyContent: "center", mb: 1 }}>
-          {[...Array(5)].map((_, i) => (
-            <StarIcon key={i} sx={{ color: "var(--gold)", fontSize: 28 }} />
-          ))}
-        </Box>
+  {/* ⭐ RESEÑAS */}
+  <Box
+    sx={{
+      flex: 1,
+      textAlign: "center",
+      py: 5,
+      px: 2,
+       backgroundColor: "#111",
+      color: "white",
+    }}
+  >
+    <Box sx={{ display: "flex", justifyContent: "center", mb: 1 }}>
+      {[...Array(5)].map((_, i) => (
+        <StarIcon key={i} sx={{ color: "var(--gold)", fontSize: 28 }} />
+      ))}
+    </Box>
 
-        <Typography variant="h5" sx={{ color: "var(--gold)", mb: 1 }}>
-          ¿Te ha gustado la experiencia?
-        </Typography>
+    <Typography variant="h5" sx={{ color: "var(--gold)", mb: 1 }}>
+      ¿Te ha gustado la experiencia?
+    </Typography>
 
-        <Typography sx={{ mb: 2 }}>
-          Tu opinión nos ayuda a seguir creciendo 🚀
-        </Typography>
+    <Typography sx={{ mb: 2 }}>
+      Tu opinión nos ayuda a seguir creciendo 🚀
+    </Typography>
 
-        <Button
-          variant="contained"
-          component="a"
-          href="https://g.page/r/Ccos0LgLSRUuEBM/review"
-          target="_blank"
-          sx={{
-            backgroundColor: "var(--orange)",
-            fontWeight: "bold",
-            px: 4,
-            py: 1.2,
-            borderRadius: 3,
-            "&:hover": {
-              backgroundColor: "var(--gold)",
-              color: "#000",
-            },
-          }}
-        >
-          Puntuanos
-        </Button>
-      </Box>
+    <Button
+      variant="contained"
+      component="a"
+      href="https://g.page/r/Ccos0LgLSRUuEBM/review"
+      target="_blank"
+      sx={{
+        backgroundColor: "var(--orange)",
+        fontWeight: "bold",
+        px: 4,
+        py: 1.2,
+        borderRadius: 3,
+        "&:hover": {
+          backgroundColor: "var(--gold)",
+          color: "#000",
+        },
+      }}
+    >
+      Puntuanos
+    </Button>
+  </Box>
+</Box>
 
-      <Footer />
+      
     </Box>
   );
 }
