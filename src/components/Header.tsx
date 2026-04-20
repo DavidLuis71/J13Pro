@@ -33,7 +33,6 @@ interface Page {
 }
 
 const staticPages = [
-  { label: "Admin", path: "/admin" },
   { label: "Contáctanos", path: "/contacto" },
   { label: "Galeria", path: "/galery" },
   { label: "Patrocinadores", path: "/sponsors" },

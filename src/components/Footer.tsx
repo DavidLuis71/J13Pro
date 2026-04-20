@@ -24,14 +24,6 @@ export default function Footer() {
         </IconButton>
         <IconButton
           component="a"
-          href="https://twitter.com/j13pro_"
-          target="_blank"
-          sx={{ color: "#1DA1F2", fontSize: 30 }}
-        >
-          <FaTwitter />
-        </IconButton>
-        <IconButton
-          component="a"
           href="https://www.instagram.com/j13pro_/"
           target="_blank"
           sx={{ color: "#E1306C", fontSize: 30 }}

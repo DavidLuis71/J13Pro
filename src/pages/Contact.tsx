@@ -5,8 +5,8 @@ import {
   Button,
   Typography,
   Alert,
-  CircularProgress,
 } from "@mui/material";
+import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 
 export default function Contacto() {
   const [form, setForm] = useState({
@@ -16,7 +16,6 @@ export default function Contacto() {
     mensaje: "",
   });
 
-  const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<null | "ok" | "error">(null);
 
   const handleChange = (
@@ -33,7 +32,7 @@ export default function Contacto() {
     return true;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!validate()) {
@@ -41,45 +40,37 @@ export default function Contacto() {
       return;
     }
 
-    setLoading(true);
-    setStatus(null);
+    const numero = "34665691927"; // 👈 WHATSAPP DEL DUEÑO
 
-    try {
-      const res = await fetch("/Version2/Contact.php", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(form),
-      });
+    const mensaje = `
+📩 Nuevo contacto desde la web
 
-      const data = await res.json();
+👤 Nombre: ${form.nombre}
+📧 Email: ${form.email}
+📞 Teléfono: ${form.telefono || "No indicado"}
 
-      if (data.ok) {
-        setStatus("ok");
-        setForm({
-          nombre: "",
-          email: "",
-          telefono: "",
-          mensaje: "",
-        });
-      } else {
-        setStatus("error");
-      }
-    } catch (err) {
-      console.error(err);
-      setStatus("error");
-    }
+💬 Mensaje:
+${form.mensaje}
+    `;
 
-    setLoading(false);
+    const url = `https://wa.me/${numero}?text=${encodeURIComponent(
+      mensaje
+    )}`;
+
+    window.open(url, "_blank");
+
+    setStatus("ok");
+
+    setForm({
+      nombre: "",
+      email: "",
+      telefono: "",
+      mensaje: "",
+    });
   };
 
   return (
     <Box sx={{ width: "100vw", overflowX: "hidden" }}>
-      
-      {/* 👇 HEADER */}
-      
-
       {/* CONTENIDO */}
       <Box
         sx={{
@@ -97,18 +88,18 @@ export default function Contacto() {
         </Typography>
 
         <Typography sx={{ mb: 3 }}>
-          Envíanos tu mensaje y te responderemos lo antes posible.
+          Escríbenos por WhatsApp y te responderemos lo antes posible ⚡
         </Typography>
 
         {status === "ok" && (
           <Alert severity="success" sx={{ mb: 2 }}>
-            Mensaje enviado correctamente 🔥
+            Abriendo WhatsApp... 📲
           </Alert>
         )}
 
         {status === "error" && (
           <Alert severity="error" sx={{ mb: 2 }}>
-            Revisa los campos o inténtalo más tarde
+            Completa los campos obligatorios
           </Alert>
         )}
 
@@ -156,34 +147,25 @@ export default function Contacto() {
             sx={textFieldStyle}
           />
 
-          <Box sx={{ mt: 2, position: "relative" }}>
-            <Button
-              variant="contained"
-              type="submit"
-              disabled={loading}
-              fullWidth
-            >
-              Enviar
-            </Button>
-
-            {loading && (
-              <CircularProgress
-                size={24}
-                sx={{
-                  position: "absolute",
-                  top: "50%",
-                  left: "50%",
-                  marginTop: "-12px",
-                  marginLeft: "-12px",
-                }}
-              />
-            )}
-          </Box>
+          <Button
+            variant="contained"
+            type="submit"
+             startIcon={<WhatsAppIcon />}
+            fullWidth
+            sx={{
+              mt: 2,
+              backgroundColor: "#25D366", 
+              fontWeight: "bold",
+              "&:hover": {
+                backgroundColor: "var(--gold)",
+                color: "#000",
+              },
+            }}
+          >
+            Enviar por WhatsApp
+          </Button>
         </form>
       </Box>
-
-      {/* 👇 FOOTER (opcional) */}
-      
     </Box>
   );
 }

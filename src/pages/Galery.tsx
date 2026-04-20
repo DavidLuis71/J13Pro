@@ -16,6 +16,7 @@ interface Album {
   name: string;
   slug: string;
   cover_url?: string;
+  type: "image" | "video";
 }
 
 interface Image {
@@ -27,8 +28,6 @@ export default function Gallery() {
   const [albums, setAlbums] = useState<Album[]>([]);
   const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
   const [images, setImages] = useState<Image[]>([]);
-
-  // 👉 NUEVO: imagen abierta en grande
   const [selectedImage, setSelectedImage] = useState<Image | null>(null);
 
   // ---------------- LOAD ALBUMS ----------------
@@ -41,7 +40,7 @@ export default function Gallery() {
     setAlbums(data || []);
   };
 
-  // ---------------- LOAD IMAGES ----------------
+  // ---------------- LOAD MEDIA ----------------
   const fetchImages = async (slug: string) => {
     const { data } = await supabase
       .from("gallery_images")
@@ -74,25 +73,13 @@ export default function Gallery() {
     setSelectedImage(null);
   };
 
+  const isVideoAlbum = selectedAlbum?.type === "video";
+
   return (
-    <Box sx={{ width: "100vw", minHeight: "100vh", overflowX: "hidden" }}>
-      
-      
-
-      {/*
-      <Box
-        sx={{
-          textAlign: "center",
-          py: 5,
-          background: "linear-gradient(180deg, #111, #000)",
-          color: "white",
-        }}
-      >
-        <Typography variant="h4" sx={{ fontWeight: "bold" }}>
-          📸 Galería
-        </Typography>
-      </Box> */}
-
+    <Box
+      onContextMenu={(e) => e.preventDefault()}
+      sx={{ width: "100vw", minHeight: "100vh", overflowX: "hidden" }}
+    >
       {/* ---------------- ALBUM GRID ---------------- */}
       {!selectedAlbum && (
         <Box
@@ -126,24 +113,62 @@ export default function Gallery() {
                 },
               }}
             >
-              {a.cover_url ? (
-                <img
-                  src={a.cover_url}
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                  }}
-                />
-              ) : (
-                <Box
-                  sx={{
-                    width: "100%",
-                    height: "100%",
-                    background: "linear-gradient(135deg, #111, #222)",
-                  }}
-                />
-              )}
+      {a.type === "video" ? (
+  <Box
+    sx={{
+      width: "100%",
+      height: "100%",
+      background: "black",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      position: "relative",
+    }}
+  >
+    {/* ICONO PLAY */}
+    <Typography
+      sx={{
+        fontSize: "3rem",
+        color: "white",
+        opacity: 0.9,
+        textShadow: "0 0 10px rgba(255,0,0,0.4)",
+      }}
+    >
+      ▶
+    </Typography>
+
+    {/* overlay sutil */}
+    <Box
+      sx={{
+        position: "absolute",
+        inset: 0,
+        background:
+          "radial-gradient(circle, rgba(255,0,0,0.15), transparent 70%)",
+      }}
+    />
+  </Box>
+) : (
+  <>
+    {a.cover_url ? (
+      <img
+        src={a.cover_url}
+        style={{
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+        }}
+      />
+    ) : (
+      <Box
+        sx={{
+          width: "100%",
+          height: "100%",
+          background: "linear-gradient(135deg,#111,#222)",
+        }}
+      />
+    )}
+  </>
+)}
 
               <Box
                 sx={{
@@ -154,20 +179,45 @@ export default function Gallery() {
                 }}
               />
 
-             <Box
+              <Box
+                sx={{
+                  position: "absolute",
+                  bottom: 10,
+                  left: 10,
+                  backgroundColor: "rgba(0,0,0,0.55)",
+                  backdropFilter: "blur(4px)",
+                  px: 1.5,
+                  py: 0.5,
+                  borderRadius: 2,
+                }}
+              >
+               <Typography
   sx={{
-    position: "absolute",
-    bottom: 10,
-    left: 10,
-    backgroundColor: "rgba(0,0,0,0.55)",
-    backdropFilter: "blur(4px)",
-    px: 1.5,
-    py: 0.5,
-    borderRadius: 2,
+    fontWeight: "bold",
+    fontSize: "0.9rem",
+    color: "white",
+    display: "flex",
+    alignItems: "center",
+    gap: 0.5,
   }}
 >
-  <Typography sx={{ fontWeight: "bold", fontSize: "0.9rem", color: "white" }}>
-    📁 {a.name}
+  {a.type === "video" ? "🎬" : "📁"} {a.name}
+</Typography>
+              </Box>
+              <Box
+  sx={{
+    position: "absolute",
+    top: 8,
+    right: 8,
+    backgroundColor:
+      a.type === "video" ? "rgba(255,50,50,0.85)" : "rgba(0,0,0,0.55)",
+    px: 1,
+    py: 0.3,
+    borderRadius: 1,
+  }}
+>
+  <Typography sx={{ fontSize: "10px", color: "white" }}>
+    {a.type === "video" ? "VIDEO" : "FOTOS"}
   </Typography>
 </Box>
             </Box>
@@ -177,8 +227,9 @@ export default function Gallery() {
 
       {/* ---------------- ALBUM VIEW ---------------- */}
       <Dialog fullScreen open={!!selectedAlbum} onClose={closeAlbum}>
-        <DialogContent sx={{ backgroundColor: "#0a0a0a", color: "white", p: 2 }}>
-          
+        <DialogContent
+          sx={{ backgroundColor: "#0a0a0a", color: "white", p: 2 }}
+        >
           {/* HEADER */}
           <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
             <IconButton onClick={closeAlbum} sx={{ color: "white" }}>
@@ -190,45 +241,73 @@ export default function Gallery() {
             </Typography>
           </Box>
 
-          {/* IMAGES GRID */}
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: {
-                xs: "repeat(2, 1fr)",
-                sm: "repeat(3, 1fr)",
-                md: "repeat(4, 1fr)",
-              },
-              gap: 1,
-            }}
-          >
-            {images.map((img) => (
-              <Box
-                key={img.id}
-                onClick={() => openImage(img)}   // 👈 CLICK PARA ABRIR
-                sx={{
-                  borderRadius: 2,
-                  overflow: "hidden",
-                  height: 160,
-                  cursor: "pointer",
-                  transition: "0.3s",
-
-                  "&:hover": {
-                    transform: "scale(1.03)",
-                  },
-                }}
-              >
-                <img
-                  src={img.url}
+          {/* ---------------- VIDEO ALBUM ---------------- */}
+          {isVideoAlbum ? (
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                height: "80vh",
+              }}
+            >
+              {images[0] ? (
+                <video
+                  src={images[0].url}
+                  controls
                   style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
+                    maxWidth: "100%",
+                    maxHeight: "80vh",
+                    borderRadius: 12,
                   }}
                 />
-              </Box>
-            ))}
-          </Box>
+              ) : (
+                <Typography>No hay vídeo</Typography>
+              )}
+            </Box>
+          ) : (
+            /* ---------------- IMAGE GRID ---------------- */
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: {
+                  xs: "repeat(2, 1fr)",
+                  sm: "repeat(3, 1fr)",
+                  md: "repeat(4, 1fr)",
+                },
+                gap: 1,
+              }}
+            >
+              {images.map((img) => (
+                <Box
+                  key={img.id}
+                  onClick={() => openImage(img)}
+                  sx={{
+                    borderRadius: 2,
+                    overflow: "hidden",
+                    height: 160,
+                    cursor: "pointer",
+                    transition: "0.3s",
+
+                    "&:hover": {
+                      transform: "scale(1.03)",
+                    },
+                  }}
+                >
+                  <img
+                    src={img.url}
+                    draggable={false}
+                    onDragStart={(e) => e.preventDefault()}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                  />
+                </Box>
+              ))}
+            </Box>
+          )}
         </DialogContent>
       </Dialog>
 
@@ -249,7 +328,6 @@ export default function Gallery() {
             position: "relative",
           }}
         >
-          {/* CLOSE */}
           <IconButton
             onClick={closeImage}
             sx={{
@@ -263,7 +341,6 @@ export default function Gallery() {
             <CloseIcon />
           </IconButton>
 
-          {/* IMAGE BIG */}
           {selectedImage && (
             <img
               src={selectedImage.url}
@@ -276,8 +353,6 @@ export default function Gallery() {
           )}
         </DialogContent>
       </Dialog>
-
-      
     </Box>
   );
 }

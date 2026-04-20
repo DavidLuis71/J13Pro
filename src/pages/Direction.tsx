@@ -41,48 +41,137 @@ export default function ComoLlegar() {
 
   const renderContent = () => {
     switch (tab) {
-      case "bus":
-        return (
-          <>
-            <Typography sx={textStyle}>
-              Líneas urbanas cercanas:
-            </Typography>
-            <ul>
-              <li>Línea 3 → Calle la Peña (nº 87)</li>
-              <li>Línea 7 → Luis Quintanilla Isasi (nº 482)</li>
-              <li>Línea 24 → Joaquín Rodrigo Díez (nº 455)</li>
-              <li>Línea 24 → Camarreal (nº 478)</li>
-            </ul>
-          </>
-        );
+    case "bus":
+  return (
+    <Box sx={{ display: "grid", gap: 2 }}>
+      <Typography sx={textStyle}>
+        🚌 Líneas urbanas cercanas
+      </Typography>
 
-      case "tren":
-        return (
-          <>
-            <Typography sx={textStyle}>
-              Estación más cercana:
-            </Typography>
-            <Typography>
-              Apeadero de Adarzo (12 min andando)
-            </Typography>
-          </>
-        );
+      {[
+        { line: "Línea 3", place: "Calle la Peña", stop: "nº 87" },
+        { line: "Línea 7", place: "Luis Quintanilla Isasi", stop: "nº 482" },
+        { line: "Línea 24", place: "Joaquín Rodrigo Díez", stop: "nº 455" },
+        { line: "Línea 24", place: "Camarreal", stop: "nº 478" },
+      ].map((b, i) => (
+        <Box
+          key={i}
+          sx={{
+            p: 2,
+            borderRadius: 2,
+            background: "rgba(255,255,255,0.05)",
+            border: "1px solid rgba(255,215,0,0.15)",
+            transition: "0.3s",
+            "&:hover": {
+              transform: "scale(1.02)",
+              background: "rgba(255,215,0,0.08)",
+            },
+          }}
+        >
+          <Typography sx={{ fontWeight: "bold", color: "var(--gold)" }}>
+            {b.line}
+          </Typography>
 
-      case "coche":
-        return (
-          <>
-            <Typography sx={textStyle}>
-              Accesos principales:
-            </Typography>
-            <ul>
-              <li>S-10 → N-623 / Hospital</li>
-              <li>S-20 → salida 2 (La Albericia / Cazoña)</li>
-              <li>A-67 → salida 199B (Cuatro Caminos)</li>
-            </ul>
-          </>
-        );
+          <Typography sx={{ fontSize: "0.9rem" }}>
+            📍 {b.place}
+          </Typography>
 
-      case "info":
+          <Typography sx={{ fontSize: "0.8rem", opacity: 0.7 }}>
+            Parada: {b.stop}
+          </Typography>
+        </Box>
+      ))}
+    </Box>
+  );
+
+case "tren":
+  return (
+    <Box sx={{ display: "grid", gap: 2 }}>
+      <Typography sx={textStyle}>
+        🚆 Estación más cercana
+      </Typography>
+
+      <Box
+        sx={{
+          p: 3,
+          borderRadius: 2,
+          background: "rgba(255,255,255,0.05)",
+          border: "1px solid rgba(255,215,0,0.2)",
+          textAlign: "center",
+        }}
+      >
+        <Typography sx={{ fontWeight: "bold", fontSize: "1.1rem" }}>
+          Apeadero de Adarzo
+        </Typography>
+
+        <Typography sx={{ mt: 1, opacity: 0.8 }}>
+          🚶‍♂️ 12 minutos andando
+        </Typography>
+
+        <Typography sx={{ mt: 1, fontSize: "0.85rem", opacity: 0.6 }}>
+          Ruta directa y sin complicaciones desde la estación
+        </Typography>
+      </Box>
+    </Box>
+  );
+   case "coche":
+  return (
+    <Box sx={{ display: "grid", gap: 2 }}>
+      <Typography sx={textStyle}>
+        🚗 Accesos principales
+      </Typography>
+
+      {[
+        "S-10 → N-623 / Hospital",
+        "S-20 → salida 2 (La Albericia / Cazoña)",
+        "A-67 → salida 199B (Cuatro Caminos)",
+      ].map((r, i) => (
+        <Box
+          key={i}
+          sx={{
+            p: 2,
+            borderRadius: 2,
+            background: "rgba(255,255,255,0.05)",
+            borderLeft: "3px solid var(--gold)",
+            transition: "0.3s",
+            "&:hover": {
+              background: "rgba(255,215,0,0.08)",
+              transform: "translateX(5px)",
+            },
+          }}
+        >
+          <Typography sx={{ fontSize: "0.95rem" }}>
+            {r}
+          </Typography>
+        </Box>
+      ))}
+    </Box>
+  );
+   case "info":
+  return (
+    <Box
+      sx={{
+        p: 3,
+        borderRadius: 2,
+        background:
+          "linear-gradient(135deg, rgba(255,215,0,0.08), rgba(0,0,0,0.2))",
+        border: "1px solid rgba(255,215,0,0.2)",
+        textAlign: "center",
+      }}
+    >
+      <Typography sx={{ fontSize: "1.2rem", mb: 1 }}>
+        🧭 Conexiones adicionales
+      </Typography>
+
+      <Typography>
+        Conexión directa con Torrelavega y otros puntos mediante autobuses ALSA.
+      </Typography>
+
+      <Typography sx={{ mt: 2, fontSize: "0.85rem", opacity: 0.6 }}>
+        Consulta horarios en la app oficial de ALSA
+      </Typography>
+    </Box>
+  );
         return (
           <Typography>
             Conexión con Torrelavega y otros puntos mediante autobuses ALSA.

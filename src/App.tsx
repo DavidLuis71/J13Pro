@@ -11,6 +11,8 @@ import Galery from "./pages/Galery"
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import Sponsors from "./pages/Sponsors"
+import ProtectedRoute from "./ProtectedRoute";
+import LoginAdmin from "./Admin/Login-admin";
 
 function App() {
   return (
@@ -19,7 +21,16 @@ function App() {
           <Header />
     <Routes>
       <Route path="/" element={<Index />} />
-      <Route path="/admin" element={<AdminPanel />} /> 
+        {/* LOGIN */}
+  <Route path="/login-admin" element={<LoginAdmin />} />
+       <Route
+    path="/admin"
+    element={
+      <ProtectedRoute>
+        <AdminPanel />
+      </ProtectedRoute>
+    }
+  />
       <Route path="/legal" element={<Legal />} /> 
       <Route path="/contacto" element={<Contacto />} /> 
       <Route path="/direction" element={<Direction/>}/>

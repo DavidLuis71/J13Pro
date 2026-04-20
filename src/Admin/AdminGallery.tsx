@@ -10,6 +10,7 @@ import {
   DialogContent,
   DialogActions,
   IconButton,
+  MenuItem,
 } from "@mui/material";
 
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -68,6 +69,7 @@ interface Album {
   name: string;
   slug: string;
   cover_url?: string;
+   type: "image" | "video";
 }
 
 interface Image {
@@ -98,6 +100,7 @@ const [uploading, setUploading] = useState(false);
 const [uploadProgress, setUploadProgress] = useState(0);
 
 const [videoDialogOpen, setVideoDialogOpen] = useState(false);
+const [albumType, setAlbumType] = useState<"image" | "video">("image");
   // ---------------- ALBUMS ----------------
   const fetchAlbums = async () => {
     const { data } = await supabase
@@ -130,10 +133,11 @@ const [videoDialogOpen, setVideoDialogOpen] = useState(false);
   const createAlbum = async () => {
     const slug = slugify(newName);
 
-    await supabase.from("gallery_albums").insert({
-      name: newName,
-      slug,
-    });
+  await supabase.from("gallery_albums").insert({
+  name: newName,
+  slug,
+  type: albumType,
+});
 
     setNewName("");
     setOpenCreate(false);
@@ -182,6 +186,52 @@ const uploadImage = async (e: any) => {
   const files = Array.from(e.target.files) as File[];
 
   if (!files.length || !selectedAlbum) return;
+  const album = albums.find(a => a.slug === selectedAlbum);
+const isVideoAlbum = album?.type === "video";
+if (isVideoAlbum) {
+  const video = files.find(f => f.type.startsWith("video/"));
+
+  if (!video) return;
+
+  // opcional: borrar anterior
+  const existing = await supabase
+    .from("gallery_images")
+    .select("*")
+    .eq("album_slug", selectedAlbum);
+
+  if (existing.data?.length) {
+    await Promise.all(
+      existing.data.map(async (img) => {
+        await supabase.storage.from("gallery").remove([img.file_path]);
+        await supabase.from("gallery_images").delete().eq("id", img.id);
+      })
+    );
+  }
+
+  const cleanName = sanitizeFileName(video.name);
+  const filePath = `${selectedAlbum}/${Date.now()}-${cleanName}`;
+
+  const { error } = await supabase.storage
+    .from("gallery")
+    .upload(filePath, video);
+
+  if (error) return;
+
+  const { data } = supabase.storage
+    .from("gallery")
+    .getPublicUrl(filePath);
+
+  await supabase.from("gallery_images").insert({
+    album_slug: selectedAlbum,
+    file_path: filePath,
+    url: data.publicUrl,
+    alt: video.name,
+  });
+
+  await fetchImages(selectedAlbum);
+  setUploading(false);
+  return;
+}
 
   setUploading(true);
   setUploadProgress(0);
@@ -193,7 +243,7 @@ const uploadImage = async (e: any) => {
   const imageFiles = files.filter((file) => file.type.startsWith("image/"));
   const videoFiles = files.filter((file) => file.type.startsWith("video/"));
 
-  const total = imageFiles.length;
+  const total = isVideoAlbum ? 1 : imageFiles.length;
 
   // si no hay imágenes
   if (total === 0) {
@@ -285,7 +335,7 @@ const setAlbumCover = async (albumSlug: string, imageUrl: string) => {
   return (
     <Box sx={{ p: 3 }}>
       <Typography variant="h4" sx={{ mb: 2 }}>
-        Galería (Admin)
+        Galería 
       </Typography>
 
       {/* CREATE */}
@@ -340,26 +390,65 @@ const setAlbumCover = async (albumSlug: string, imageUrl: string) => {
       }}
     >
       {/* COVER IMAGE */}
-      {a.cover_url ? (
-        <img
-          src={a.cover_url}
-          style={{
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-            transition: "0.3s ease",
-          }}
-        />
-      ) : (
-        <Box
-          sx={{
-            width: "100%",
-            height: "100%",
-            background:
-              "linear-gradient(135deg, #111, #222)",
-          }}
-        />
-      )}
+{/* COVER */}
+{a.type === "video" ? (
+  <Box
+    sx={{
+      width: "100%",
+      height: "100%",
+      background: "linear-gradient(135deg, #000, #222)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      position: "relative",
+    }}
+  >
+    {/* ICONO PLAY */}
+    <Typography
+      sx={{
+        fontSize: "2.5rem",
+        color: "white",
+        opacity: 0.9,
+      }}
+    >
+      ▶
+    </Typography>
+
+    {/* BADGE VIDEO */}
+    <Box
+      sx={{
+        position: "absolute",
+        top: 8,
+        left: 8,
+        backgroundColor: "rgba(255,0,0,0.8)",
+        px: 1,
+        py: 0.3,
+        borderRadius: 1,
+      }}
+    >
+      <Typography sx={{ fontSize: "10px", color: "white" }}>
+        VIDEO
+      </Typography>
+    </Box>
+  </Box>
+) : a.cover_url ? (
+  <img
+    src={a.cover_url}
+    style={{
+      width: "100%",
+      height: "100%",
+      objectFit: "cover",
+    }}
+  />
+) : (
+  <Box
+    sx={{
+      width: "100%",
+      height: "100%",
+      background: "linear-gradient(135deg, #111, #222)",
+    }}
+  />
+)}
 
       {/* OVERLAY */}
       <Box
@@ -540,15 +629,26 @@ const setAlbumCover = async (albumSlug: string, imageUrl: string) => {
     }}
   >
     {/* IMAGE */}
-    <img
-      src={img.url}
-      style={{
-        width: "100%",
-        height: "100%",
-        objectFit: "cover",
-        transition: "0.3s ease",
-      }}
-    />
+  {img.url.includes(".mp4") || img.url.includes("video") ? (
+  <video
+    src={img.url}
+    controls
+    style={{
+      width: "100%",
+      height: "100%",
+      objectFit: "cover",
+    }}
+  />
+) : (
+  <img
+    src={img.url}
+    style={{
+      width: "100%",
+      height: "100%",
+      objectFit: "cover",
+    }}
+  />
+)}
 
     {/* DARK OVERLAY */}
     <Box
@@ -619,8 +719,62 @@ const setAlbumCover = async (albumSlug: string, imageUrl: string) => {
             label="Nombre del álbum"
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
-            sx={{ mt: 2 }}
+            sx={{
+    mt: 2,
+
+    // input text
+    input: { color: "white" },
+
+    // label
+    "& label": { color: "rgba(255,255,255,0.7)" },
+    "& label.Mui-focused": { color: "var(--gold)" },
+
+    // border
+    "& .MuiOutlinedInput-root": {
+      "& fieldset": { borderColor: "rgba(255,255,255,0.3)" },
+      "&:hover fieldset": { borderColor: "rgba(255,255,255,0.6)" },
+      "&.Mui-focused fieldset": { borderColor: "var(--gold)" },
+    },
+  }}
           />
+          <TextField
+  select
+  fullWidth
+  label="Tipo de álbum"
+  value={albumType}
+  onChange={(e) => setAlbumType(e.target.value as any)}
+ sx={{
+    mt: 2,
+
+    // 👇 TEXTO SELECCIONADO (CLAVE)
+    "& .MuiSelect-select": {
+      color: "white",
+    },
+
+    // label
+    "& label": { color: "rgba(255,255,255,0.7)" },
+
+    // borde
+    "& .MuiOutlinedInput-root fieldset": {
+      borderColor: "rgba(255,255,255,0.3)",
+    },
+  }}
+  slotProps={{
+    select: {
+      MenuProps: {
+        PaperProps: {
+          sx: {
+            bgcolor: "#111",
+            color: "white",
+          },
+        },
+      },
+    },
+  }}
+>
+  <MenuItem value="image">Imágenes</MenuItem>
+  <MenuItem value="video">Vídeo (1 solo)</MenuItem>
+</TextField>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenCreate(false)}>Cancelar</Button>

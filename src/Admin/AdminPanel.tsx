@@ -197,7 +197,7 @@ const updatePageTitle = async () => {
   await fetchPages();
 };
   return (
-    <Box sx={{ minHeight: "100vh", bgcolor: "#fff"}}>
+    <Box sx={{ minHeight: "100vh", bgcolor: "#fff",color: "white",}}>
       
 
       <Box sx={{ mt: 3, display: "flex", flexDirection: "column", gap: 3,paddingLeft:"10px",paddingRight:"10px" }}>
@@ -220,7 +220,7 @@ const updatePageTitle = async () => {
             scrollButtons="auto"
           >
             {/* FIJO */}
-            <Tab value="carousel" label="Carrusel Inicio" />
+            <Tab value="carousel" label="Inicio" />
 <Tab
   value="galeria"
   label="Galería"
@@ -237,6 +237,7 @@ const updatePageTitle = async () => {
                   label={page.title || page.slug}
                 />
               ))}
+              <Tab value="nav-groups" label="Grupos de navegación" />
           </Tabs>
         </Paper>
 
@@ -249,6 +250,57 @@ const updatePageTitle = async () => {
 ) : activeSlug ? (
   activeSlug === "sponsors" ? (
   <AdminSponsors />
+) :
+activeSlug === "nav-groups" ? (
+  <Box>
+    <Typography variant="h4" sx={{ mb: 2 }}>
+      Grupos de navegación
+    </Typography>
+
+    {pages
+      .filter((p) => p.is_nav_group)
+      .map((group) => (
+        <Paper
+          key={group.id}
+          sx={{
+            p: 2,
+            mb: 2,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <Typography>{group.title}</Typography>
+
+          <Box sx={{ display: "flex", gap: 1 }}>
+            <Button
+              size="small"
+              variant="contained"
+              onClick={() => {
+                setPageToEdit(group);
+                setEditTitle(group.title);
+                setOpenEdit(true);
+              }}
+            >
+              Renombrar
+            </Button>
+
+            <Button
+              size="small"
+              variant="contained"
+              color="error"
+              onClick={() => {
+                setPageToDelete(group.slug);
+                setDeleteError(null);
+                setOpenDelete(true);
+              }}
+            >
+              Eliminar
+            </Button>
+          </Box>
+        </Paper>
+      ))}
+  </Box>
 ) :
 <>
   {/* HEADER DEL CONTENIDO */}
@@ -307,9 +359,22 @@ const updatePageTitle = async () => {
       </Box>
 
       {/* CREATE PAGE MODAL */}
-      <Dialog open={openCreate} onClose={() => setOpenCreate(false)}>
+      <Dialog open={openCreate} onClose={() => setOpenCreate(false)}  PaperProps={{
+    sx: {
+      bgcolor: "#111",
+      color: "white",
+    },
+  }}>
         <DialogTitle>Crear nueva página</DialogTitle>
+<Box sx={{ px: 3, pt: 1 }}>
+  <Typography sx={{ fontSize: "0.9rem", opacity: 0.7 }}>
+    Crea una nueva sección de la web.
+  </Typography>
 
+  <Typography sx={{ fontSize: "0.8rem", opacity: 0.5, mt: 0.5 }}>
+    Ejemplo: Equipo, Noticias, Servicios, Contacto...
+  </Typography>
+</Box>
         <DialogContent>
           {/* TITULO */}
           <TextField
@@ -331,6 +396,9 @@ const updatePageTitle = async () => {
   borderRadius: 1,
 }}
           />
+<Typography sx={{ fontSize: "12px", opacity: 0.6, mt: 0.5 }}>
+  Este será el nombre visible en el menú.
+</Typography>
 
 
           {/* NAV GROUP */}
@@ -343,30 +411,45 @@ const updatePageTitle = async () => {
                   setIsNavGroup(e.target.checked);
                   if (e.target.checked) setParent(null);
                 }}
+                sx={{
+        color: "rgba(255,255,255,0.6)", // color normal
+        "&.Mui-checked": {
+          color: "var(--gold)", // cuando está marcado
+        },
+      }}
               />
             }
             label="Es grupo de navegación (no tiene contenido)"
           />
 {isNavGroup && (
-  <Typography
-    variant="body2"
-    sx={{
-      mt: 1,
-      color: "warning.main",
-      backgroundColor: "#fff3cd",
-      p: 1,
-      borderRadius: 1,
-    }}
-  >
-    ⚠️ Este grupo no aparecerá en el menú hasta que tenga al menos una subpágina dentro.
+ <Box
+  sx={{
+    mt: 1,
+    p: 1.5,
+    borderRadius: 2,
+    backgroundColor: "#fff3cd",
+    color:"black"
+  }}
+>
+  <Typography sx={{ fontWeight: "bold", fontSize: "12px" }}>
+    📁 Grupo de navegación
   </Typography>
+
+  <Typography sx={{ fontSize: "11px", mt: 0.5 }}>
+    No es una página normal. Solo sirve para organizar subpáginas en el menú.
+  </Typography>
+
+  <Typography sx={{ fontSize: "10px", opacity: 0.7, mt: 0.5 }}>
+    Ejemplo: "Equipo" puede contener "Entrenadores", "Jugadores", etc.
+  </Typography>
+</Box>
 )}
           {/* PARENT SELECT */}
           {!isNavGroup && (
            <TextField
   select
   fullWidth
-  label="Página padre (opcional)"
+label="📁 Agrupar dentro de..."
   value={parent || ""}
   onChange={(e) => setParent(e.target.value || null)}
   sx={{
@@ -385,8 +468,49 @@ const updatePageTitle = async () => {
       </MenuItem>
     ))}
 </TextField>
+
           )}
+          <Typography sx={{ fontSize: "11px", opacity: 0.6, mt: 1 }}>
+  💡 Si eliges un grupo, esta página aparecerá dentro de ese menú desplegable.
+</Typography>
         </DialogContent>
+<Box
+  sx={{
+    mt: 3,
+    p: 2,
+    borderRadius: 2,
+    backgroundColor: "#111",
+    color: "white",
+  }}
+>
+  <Typography sx={{ fontSize: "10px", opacity: 0.6 }}>
+    PREVIEW ESTRUCTURA
+  </Typography>
+
+  {/* PADRE */}
+  {parent && (
+    <Typography sx={{ opacity: 0.7, fontSize: "12px" }}>
+      📁 {pages.find(p => p.slug === parent)?.title || "Página padre"}
+    </Typography>
+  )}
+
+  {/* HIJA */}
+  <Typography sx={{ fontWeight: "bold", ml: parent ? 2 : 0 }}>
+    {isNavGroup ? "📁 " : "📄 "}
+    {newTitle || "Título de la página"}
+  </Typography>
+
+  <Typography sx={{ fontSize: "11px", opacity: 0.7, ml: parent ? 2 : 0 }}>
+    /{newSlug || "slug"}
+  </Typography>
+
+  {/* BADGE EXPLICATIVO */}
+  <Typography sx={{ fontSize: "11px", mt: 1, opacity: 0.8 }}>
+    {parent
+      ? "↳ Esta página se mostrará dentro del menú del padre"
+      : "↳ Página principal en el menú"}
+  </Typography>
+</Box>
 
         <DialogActions>
           <Button onClick={() => setOpenCreate(false)}>Cancelar</Button>

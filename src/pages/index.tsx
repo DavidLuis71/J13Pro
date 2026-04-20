@@ -2,10 +2,11 @@ import { Box, Dialog, DialogTitle, DialogContent, DialogActions, Button, Typogra
 import { useState } from "react";
 import Carousel from "./Carousel";
 import StarIcon from "@mui/icons-material/Star";
+import { useNavigate } from "react-router-dom";
 
 export default function Index() {
   const [openModal, setOpenModal] = useState(true);
-
+const navigate = useNavigate();
   return (
     <Box sx={{ width: '100vw', overflowX: 'hidden' }}>
       
@@ -79,7 +80,8 @@ export default function Index() {
       Déjanos tus datos y te llamaremos a la mayor brevedad posible
     </Typography>
 
-    <Button variant="contained"  sx={{
+    <Button variant="contained" onClick={() => navigate("/contacto")}
+     sx={{
         backgroundColor: "var(--orange)",
         fontWeight: "bold",
         px: 4,
