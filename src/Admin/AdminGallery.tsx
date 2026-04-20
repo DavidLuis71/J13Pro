@@ -335,7 +335,7 @@ const setAlbumCover = async (albumSlug: string, imageUrl: string) => {
   return (
     <Box sx={{ p: 3 }}>
       <Typography variant="h4" sx={{ mb: 2 }}>
-        Galería 
+        Galería
       </Typography>
 
       {/* CREATE */}
