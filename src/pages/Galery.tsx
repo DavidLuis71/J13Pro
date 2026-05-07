@@ -28,7 +28,9 @@ export default function Gallery() {
   const [albums, setAlbums] = useState<Album[]>([]);
   const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
   const [images, setImages] = useState<Image[]>([]);
-  const [selectedImage, setSelectedImage] = useState<Image | null>(null);
+
+  // 👇 NUEVO SISTEMA
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
 
   // ---------------- LOAD ALBUMS ----------------
   const fetchAlbums = async () => {
@@ -63,14 +65,30 @@ export default function Gallery() {
   const closeAlbum = () => {
     setSelectedAlbum(null);
     setImages([]);
+    setSelectedImageIndex(null);
   };
 
-  const openImage = (img: Image) => {
-    setSelectedImage(img);
+  // ---------------- IMAGE LIGHTBOX ----------------
+  const openImage = (index: number) => {
+    setSelectedImageIndex(index);
   };
 
   const closeImage = () => {
-    setSelectedImage(null);
+    setSelectedImageIndex(null);
+  };
+
+  const goNext = () => {
+    if (selectedImageIndex === null) return;
+    setSelectedImageIndex((prev) =>
+      prev === images.length - 1 ? 0 : prev + 1
+    );
+  };
+
+  const goPrev = () => {
+    if (selectedImageIndex === null) return;
+    setSelectedImageIndex((prev) =>
+      prev === 0 ? images.length - 1 : prev - 1
+    );
   };
 
   const isVideoAlbum = selectedAlbum?.type === "video";
@@ -107,119 +125,50 @@ export default function Gallery() {
                 height: 180,
                 boxShadow: "0 6px 20px rgba(0,0,0,0.4)",
                 transition: "0.3s",
-
-                "&:hover": {
-                  transform: "scale(1.03)",
-                },
+                "&:hover": { transform: "scale(1.03)" },
               }}
             >
-      {a.type === "video" ? (
-  <Box
-    sx={{
-      width: "100%",
-      height: "100%",
-      background: "black",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      position: "relative",
-    }}
-  >
-    {/* ICONO PLAY */}
-    <Typography
-      sx={{
-        fontSize: "3rem",
-        color: "white",
-        opacity: 0.9,
-        textShadow: "0 0 10px rgba(255,0,0,0.4)",
-      }}
-    >
-      ▶
-    </Typography>
-
-    {/* overlay sutil */}
-    <Box
-      sx={{
-        position: "absolute",
-        inset: 0,
-        background:
-          "radial-gradient(circle, rgba(255,0,0,0.15), transparent 70%)",
-      }}
-    />
-  </Box>
-) : (
-  <>
-    {a.cover_url ? (
-      <img
-        src={a.cover_url}
-        style={{
-          width: "100%",
-          height: "100%",
-          objectFit: "cover",
-        }}
-      />
-    ) : (
-      <Box
-        sx={{
-          width: "100%",
-          height: "100%",
-          background: "linear-gradient(135deg,#111,#222)",
-        }}
-      />
-    )}
-  </>
-)}
-
-              <Box
-                sx={{
-                  position: "absolute",
-                  inset: 0,
-                  background:
-                    "linear-gradient(to top, rgba(0,0,0,0.7), transparent)",
-                }}
-              />
+              {a.type === "video" ? (
+                <Box
+                  sx={{
+                    width: "100%",
+                    height: "100%",
+                    background: "black",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    position: "relative",
+                  }}
+                >
+                  <Typography sx={{ fontSize: "3rem", color: "white" }}>
+                    ▶
+                  </Typography>
+                </Box>
+              ) : a.cover_url ? (
+                <img
+                  src={a.cover_url}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                  }}
+                />
+              ) : (
+                <Box sx={{ width: "100%", height: "100%", background: "#111" }} />
+              )}
 
               <Box
                 sx={{
                   position: "absolute",
                   bottom: 10,
                   left: 10,
-                  backgroundColor: "rgba(0,0,0,0.55)",
-                  backdropFilter: "blur(4px)",
-                  px: 1.5,
-                  py: 0.5,
-                  borderRadius: 2,
+                  color: "white",
                 }}
               >
-               <Typography
-  sx={{
-    fontWeight: "bold",
-    fontSize: "0.9rem",
-    color: "white",
-    display: "flex",
-    alignItems: "center",
-    gap: 0.5,
-  }}
->
-  {a.type === "video" ? "🎬" : "📁"} {a.name}
-</Typography>
+                <Typography sx={{ fontWeight: "bold" }}>
+                  {a.name}
+                </Typography>
               </Box>
-              <Box
-  sx={{
-    position: "absolute",
-    top: 8,
-    right: 8,
-    backgroundColor:
-      a.type === "video" ? "rgba(255,50,50,0.85)" : "rgba(0,0,0,0.55)",
-    px: 1,
-    py: 0.3,
-    borderRadius: 1,
-  }}
->
-  <Typography sx={{ fontSize: "10px", color: "white" }}>
-    {a.type === "video" ? "VIDEO" : "FOTOS"}
-  </Typography>
-</Box>
             </Box>
           ))}
         </Box>
@@ -227,9 +176,7 @@ export default function Gallery() {
 
       {/* ---------------- ALBUM VIEW ---------------- */}
       <Dialog fullScreen open={!!selectedAlbum} onClose={closeAlbum}>
-        <DialogContent
-          sx={{ backgroundColor: "#0a0a0a", color: "white", p: 2 }}
-        >
+        <DialogContent sx={{ backgroundColor: "#0a0a0a", color: "white" }}>
           {/* HEADER */}
           <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
             <IconButton onClick={closeAlbum} sx={{ color: "white" }}>
@@ -241,32 +188,21 @@ export default function Gallery() {
             </Typography>
           </Box>
 
-          {/* ---------------- VIDEO ALBUM ---------------- */}
+          {/* VIDEO */}
           {isVideoAlbum ? (
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                height: "80vh",
-              }}
-            >
+            <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
               {images[0] ? (
                 <video
                   src={images[0].url}
                   controls
-                  style={{
-                    maxWidth: "100%",
-                    maxHeight: "80vh",
-                    borderRadius: 12,
-                  }}
+                  style={{ maxWidth: "100%", maxHeight: "80vh" }}
                 />
               ) : (
                 <Typography>No hay vídeo</Typography>
               )}
             </Box>
           ) : (
-            /* ---------------- IMAGE GRID ---------------- */
+            /* GRID IMAGES */
             <Box
               sx={{
                 display: "grid",
@@ -278,26 +214,20 @@ export default function Gallery() {
                 gap: 1,
               }}
             >
-              {images.map((img) => (
+              {images.map((img, index) => (
                 <Box
                   key={img.id}
-                  onClick={() => openImage(img)}
+                  onClick={() => openImage(index)}
                   sx={{
+                    height: 160,
                     borderRadius: 2,
                     overflow: "hidden",
-                    height: 160,
                     cursor: "pointer",
-                    transition: "0.3s",
-
-                    "&:hover": {
-                      transform: "scale(1.03)",
-                    },
+                    "&:hover": { transform: "scale(1.03)" },
                   }}
                 >
                   <img
                     src={img.url}
-                    draggable={false}
-                    onDragStart={(e) => e.preventDefault()}
                     style={{
                       width: "100%",
                       height: "100%",
@@ -311,9 +241,9 @@ export default function Gallery() {
         </DialogContent>
       </Dialog>
 
-      {/* ---------------- IMAGE MODAL ---------------- */}
+      {/* ---------------- LIGHTBOX (NAVEGACIÓN) ---------------- */}
       <Dialog
-        open={!!selectedImage}
+        open={selectedImageIndex !== null}
         onClose={closeImage}
         maxWidth="md"
         fullWidth
@@ -321,13 +251,14 @@ export default function Gallery() {
         <DialogContent
           sx={{
             backgroundColor: "#000",
+            position: "relative",
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
             p: 0,
-            position: "relative",
           }}
         >
+          {/* CLOSE */}
           <IconButton
             onClick={closeImage}
             sx={{
@@ -336,14 +267,30 @@ export default function Gallery() {
               right: 10,
               color: "white",
               backgroundColor: "rgba(0,0,0,0.5)",
+              zIndex: 2,
             }}
           >
             <CloseIcon />
           </IconButton>
 
-          {selectedImage && (
+          {/* LEFT */}
+          <IconButton
+            onClick={goPrev}
+            sx={{
+              position: "absolute",
+              left: 10,
+              color: "white",
+              backgroundColor: "rgba(0,0,0,0.5)",
+              zIndex: 2,
+            }}
+          >
+            ←
+          </IconButton>
+
+          {/* IMAGE */}
+          {selectedImageIndex !== null && (
             <img
-              src={selectedImage.url}
+              src={images[selectedImageIndex].url}
               style={{
                 width: "100%",
                 maxHeight: "90vh",
@@ -351,6 +298,20 @@ export default function Gallery() {
               }}
             />
           )}
+
+          {/* RIGHT */}
+          <IconButton
+            onClick={goNext}
+            sx={{
+              position: "absolute",
+              right: 10,
+              color: "white",
+              backgroundColor: "rgba(0,0,0,0.5)",
+              zIndex: 2,
+            }}
+          >
+            →
+          </IconButton>
         </DialogContent>
       </Dialog>
     </Box>

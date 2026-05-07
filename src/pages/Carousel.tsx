@@ -100,7 +100,7 @@ if (images.length === 0) {
               src={img.url}
               className="active"
               autoPlay
-              muted
+              // muted
               onEnded={nextSlide} // Avanza cuando termine el video
             />
           ) : (
