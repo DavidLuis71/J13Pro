@@ -114,7 +114,9 @@ const AdminSponsors: React.FC = () => {
       <Paper sx={{ p: 2, mt: 2 }}>
         <Input
           type="file"
-          onChange={(e) => setFile(e.target.files?.[0] || null)}
+         onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
+  setFile(e.target.files?.[0] || null)
+}
         />
 
         <TextField

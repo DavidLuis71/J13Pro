@@ -21,6 +21,7 @@ import AdminPageEditor from "./AdminPageEditor";
 import AdminCarouselUpload from "./AdminCarouselUpload";
 import AdminGallery from "./AdminGallery";
 import AdminSponsors from "./AdminSponsors";
+import AdminAboutUs from "./AdminAboutUs";
 
 interface Page {
   id: string;
@@ -226,6 +227,7 @@ const updatePageTitle = async () => {
   label="Galería"
 
 />
+<Tab value="about-us" label="Quiénes somos" />
 <Tab value="sponsors" label="Sponsors" />
             {/* SOLO PÁGINAS REALES (NO NAV GROUPS) */}
             {pages
@@ -250,6 +252,8 @@ const updatePageTitle = async () => {
 ) : activeSlug ? (
   activeSlug === "sponsors" ? (
   <AdminSponsors />
+) :activeSlug === "about-us" ? (
+  <AdminAboutUs />
 ) :
 activeSlug === "nav-groups" ? (
   <Box>

@@ -2,8 +2,18 @@ import { useEffect, useState } from "react";
 import { supabase } from "../api/supabaseClient";
 import { Box, Typography, Card, CardMedia, CardContent } from "@mui/material";
 
+
+type Sponsor = {
+  id: number;
+  name: string;
+  image_url: string;
+  website?: string;
+  description?: string;
+  created_at?: string;
+};
+
 export default function Sponsors() {
-  const [sponsors, setSponsors] = useState([]);
+const [sponsors, setSponsors] = useState<Sponsor[]>([]);
 
   // 🔄 FETCH desde Supabase
   const fetchSponsors = async () => {

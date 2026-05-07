@@ -1,5 +1,5 @@
 import { Box, Typography, IconButton } from "@mui/material";
-import { FaInstagram, FaTwitter, FaTiktok } from "react-icons/fa";
+import { FaInstagram,  FaTiktok } from "react-icons/fa";
 
 export default function Footer() {
   return (

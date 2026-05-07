@@ -13,6 +13,7 @@ import Footer from "./components/Footer";
 import Sponsors from "./pages/Sponsors"
 import ProtectedRoute from "./ProtectedRoute";
 import LoginAdmin from "./Admin/Login-admin";
+import AboutUs from "./pages/AboutUs";
 
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
       <Route path="/legal" element={<Legal />} /> 
       <Route path="/contacto" element={<Contacto />} /> 
       <Route path="/direction" element={<Direction/>}/>
+      <Route path="/aboutus" element={<AboutUs/>}/>
       <Route path="/sponsors" element={<Sponsors/>}/>
         <Route path="/galery" element={<Galery/>}/>
        <Route path="/:slug" element={<PageRenderer />} />

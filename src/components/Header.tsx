@@ -34,6 +34,7 @@ interface Page {
 
 const staticPages = [
   { label: "Contáctanos", path: "/contacto" },
+    { label: "Quienes somos", path: "/aboutus" },
   { label: "Galeria", path: "/galery" },
   { label: "Patrocinadores", path: "/sponsors" },
   { label: "Cómo llegar", path: "/direction" },
