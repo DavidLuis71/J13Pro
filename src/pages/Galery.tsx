@@ -77,19 +77,23 @@ export default function Gallery() {
     setSelectedImageIndex(null);
   };
 
-  const goNext = () => {
-    if (selectedImageIndex === null) return;
-    setSelectedImageIndex((prev) =>
-      prev === images.length - 1 ? 0 : prev + 1
-    );
-  };
+const goNext = () => {
+  if (selectedImageIndex === null) return;
 
-  const goPrev = () => {
-    if (selectedImageIndex === null) return;
-    setSelectedImageIndex((prev) =>
-      prev === 0 ? images.length - 1 : prev - 1
-    );
-  };
+  setSelectedImageIndex((prev) => {
+    if (prev === null) return 0;
+    return prev === images.length - 1 ? 0 : prev + 1;
+  });
+};
+
+const goPrev = () => {
+  if (selectedImageIndex === null) return;
+
+  setSelectedImageIndex((prev) => {
+    if (prev === null) return 0;
+    return prev === 0 ? images.length - 1 : prev - 1;
+  });
+};
 
   const isVideoAlbum = selectedAlbum?.type === "video";
 
